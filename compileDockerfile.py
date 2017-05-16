@@ -8,11 +8,13 @@ metafileBasePath = sys.argv[1]
 
 variableName = "DOCKERPARTS"
 extraFilesDir = "extraFiles"
+partsF="partFiles"
 
 if variableName in os.environ :
 	partsDir = os.environ[variableName]
 	if partsDir != "" :
 		# print directory
+		partsDir = join(partsDir, partsF)
 		print "parts directory : ", partsDir
 		partsList = [f for f in os.listdir(partsDir) if isfile(join(partsDir, f)) and ".part" in f]
 		# print available parts
