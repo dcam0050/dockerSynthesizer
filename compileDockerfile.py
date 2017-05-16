@@ -11,10 +11,10 @@ extraFilesDir = "extraFiles"
 partsF="partFiles"
 
 if variableName in os.environ :
-	partsDir = os.environ[variableName]
-	if partsDir != "" :
+	rootDir = os.environ[variableName]
+	if rootDir != "" :
 		# print directory
-		partsDir = join(partsDir, partsF)
+		partsDir = join(rootDir, partsF)
 		print "parts directory : ", partsDir
 		partsList = [f for f in os.listdir(partsDir) if isfile(join(partsDir, f)) and ".part" in f]
 		# print available parts
@@ -48,7 +48,7 @@ if variableName in os.environ :
 				#check all extra files are present
 				verifiedFiles = []
 				for k in currExtraFiles:
-					if not isfile(join(partsDir,extraFilesDir,k)):
+					if not isfile(join(rootDir,extraFilesDir,k)):
 						print "Warning: Extra file " + k + " for line " + str(count) + " not found in " + join(partsDir,extraFilesDir)
 					else:
 						verifiedFiles += [k]
@@ -70,8 +70,8 @@ if variableName in os.environ :
 
 		try:
 			for j in extraFiles:
-				print "Copying", join(partsDir,extraFilesDir,j), "to", join(metafileBasePath,j)
-				shutil.copyfile(join(partsDir,extraFilesDir,j), join(metafileBasePath,j))
+				print "Copying", join(rootDir,extraFilesDir,j), "to", join(metafileBasePath,j)
+				shutil.copyfile(join(rootDir,extraFilesDir,j), join(metafileBasePath,j))
 		except:
 			sys.exit("Exception copying extra files")
 	else:

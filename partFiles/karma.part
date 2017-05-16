@@ -1,0 +1,7 @@
+ARG karmaWYSIWYDHash=e14488ffc7fcca750db54122174fe8c06fa397a0
+RUN git clone https://github.com/towardthesea/karmaWYSIWYD.git && \
+	cd karmaWYSIWYD && git checkout -b localBranch $karmaWYSIWYDHash && mkdir build && cd build && 	\
+	cmake .. 	-DCMAKE_BUILD_TYPE=RELEASE 															\
+				-DCMAKE_INSTALL_PREFIX=$CMAKE_PREFIX_PATH 											\
+				-DOpenCV_DIR=$SRC_FOLDER/opencv3/build/install/share/OpenCV 					&&  \
+	make -j$cores && make -j$cores install
