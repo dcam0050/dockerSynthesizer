@@ -1,0 +1,55 @@
+FROM nvidia/cuda:8.0-cudnn5-devel-ubuntu16.04
+
+ARG cores=6
+ENV SRC_FOLDER=/usr/local/src/robot
+
+# If host is running squid-deb-proxy on port 8000, populate /etc/apt/apt.conf.d/30proxy
+# By default, squid-deb-proxy 403s unknown sources, so apt shouldn't proxy ppa.launchpad.net
+RUN route -n | awk '/^0.0.0.0/ {print $2}' > /tmp/host_ip.txt
+RUN echo "HEAD /" | nc `cat /tmp/host_ip.txt` 8000 | grep squid-deb-proxy \
+  && (echo "Acquire::http::Proxy \"http://$(cat /tmp/host_ip.txt):8000\";" > /etc/apt/apt.conf.d/30proxy) \
+  && (echo "Acquire::http::Proxy::ppa.launchpad.net DIRECT;" >> /etc/apt/apt.conf.d/30proxy) \
+  || echo "No squid-deb-proxy detected on docker host"
+
+#create icub user
+RUN apt-get update && \
+    apt-get -y install sudo git wget && \
+    useradd -m icub && echo "icub:icub" | chpasswd && adduser icub sudo && usermod -aG video icub && usermod -s /bin/bash icub
+
+COPY keyboard /etc/default/keyboard
+COPY bashrc /home/icub/.bashrc
+
+RUN wget https://download.sublimetext.com/sublime-text_build-3126_amd64.deb && \
+	dpkg -i sublime-text_build-3126_amd64.deb && rm sublime-text_build-3126_amd64.deb && \
+	sh -c 'echo "deb http://www.icub.org/ubuntu xenial contrib/science" > /etc/apt/sources.list.d/icub.list' && \
+	apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 57A5ACB6110576A6 && \
+	mkdir $SRC_FOLDER
+
+RUN apt-get update && apt-get install -y 	\
+	build-essential 						\
+	cmake-curses-gui 						\
+	mesa-utils 								\
+	pkg-config 								\
+	checkinstall 							\
+	bash-completion 						\
+	apt-utils  								\
+	vim										\
+	software-properties-common 				\
+	xterm 									\
+	gedit									\
+	net-tools								\
+	iputils-ping 							\
+	openssh-server							\
+	expect 									\
+	icub-common								\
+	doxygen									\
+	pciutils								\
+	libasound2 								\
+	libpango1.0-0 							\
+	pulseaudio-utils 						\
+	alsa-base 								\
+	alsa-utils								\
+	tmux                                    \
+    terminator                                
+
+WORKDIR $SRC_FOLDER

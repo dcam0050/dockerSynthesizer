@@ -1,0 +1,54 @@
+#OpenCV 3
+RUN apt-get update && apt-get install -y \
+	libgtk2.0-dev 		\
+	libavcodec-dev 		\
+	libavformat-dev 	\
+	libswscale-dev 		\
+	libtbb2 			\
+	libtbb-dev 			\
+	libjpeg-dev 		\
+	libpng-dev 			\
+	libtiff-dev 		\
+	libjasper-dev 		\
+	libdc1394-22-dev 	\
+	libopenblas-dev 	\
+	liblapack-dev 		\
+	liblapacke-dev 		\
+	libboost-all-dev 	\
+	libeigen3-dev 		\
+	libatlas-dev		
+
+ARG opencv3Hash=70bbf17b133496bd7d54d034b0f94bd869e0e810
+RUN git clone https://github.com/opencv/opencv.git ./opencv3 && cd opencv3 && git checkout -b localBranch $opencv3Hash
+
+ARG opencv3ContribHash=86342522b0eb2b16fa851c020cc4e0fef4e010b7
+RUN git clone https://github.com/opencv/opencv_contrib.git && cd opencv_contrib && git checkout -b localBranch $opencv3ContribHash
+
+RUN mkdir opencv3/build 	&& cd opencv3/build 	&& mkdir ./install 							&& \
+	cmake .. 	-DCMAKE_BUILD_TYPE=Release 									\
+				-DBUILD_PERF_TESTS=OFF 										\
+				-DCMAKE_INSTALL_PREFIX=./install 							\
+				-DBUILD_TESTS=OFF 											\
+				-DBUILD_opencv_cnn_3dobj=OFF 								\
+				-DCUDA_ARCH_BIN="6.0 6.1" 									\
+				-DCUDA_FAST_MATH=ON 										\
+				-DOPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules 	\
+				-DWITH_CUBLAS=ON 											\
+				-DWITH_QT=ON 												\
+				-DWITH_TIFF=OFF 											\
+				-DWITH_TBB=ON 												\
+				-DBUILD_opencv_tracking=ON 									\
+				-DBUILD_opencv_dnn=ON										\
+				-DINSTALL_PYTHON_EXAMPLES=ON 								\
+				-DINSTALL_TESTS=ON 											\
+				-DBUILD_opencv_hdf=OFF 										\
+				-DPYTHON2_NUMPY_INCLUDE_DIRS=$SRC_FOLDER/anaconda2/lib/python2.7/site-packages/numpy/core/include 	\
+				-DPYTHON2_LIBRARY=$SRC_FOLDER/anaconda2/lib/libpython2.7.so 										\
+				-DPYTHON2_PACKAGES_PATH=$SRC_FOLDER/anaconda2/lib/python2.7/site-packages 						&& 	\
+	make -j$cores && make -j$cores install
+
+ENV OPENCV_DIR=$SRC_FOLDER/opencv3 OPENCV_ROOT=$SRC_FOLDER/opencv3/build/install 
+ENV OPENCV_LIB=$OPENCV_ROOT/lib OPENCV_BIN=$OPENCV_ROOT/bin \
+	OPENCV_INCLUDE=$OPENCV_ROOT/include OPENCV_PYTHONLIB=$OPENCV_DIR/build/lib
+ENV PATH=$OPENCV_BIN:$OPENCV_INCLUDE:$PATH \
+	LD_LIBRARY_PATH=$OPENCV_LIB:$OPENCV_PYTHONLIB:$LD_LIBRARY_PATH

@@ -1,0 +1,59 @@
+# YARP TELEPRESENCE
+RUN apt-get update && apt-get install -y \
+	swig3.0				\
+	liblua5.2-dev		
+
+ARG yarpHash=9bef32d936b6e787cc6515323b4850088cd372da
+RUN	git clone https://github.com/robotology/yarp.git && cd yarp && git checkout -b localBranch $yarpHash
+
+ADD yarp.i yarp/bindings
+
+RUN mkdir yarp/build && cd yarp/build 									&& 	\
+	cmake .. 	-DCMAKE_BUILD_TYPE=Release 									\
+				-DCREATE_DEVICE_LIBRARY_MODULES=ON 							\
+				-DCMAKE_INSTALL_PREFIX=./install 							\
+				-DCREATE_GUIS=ON 											\
+				-DCREATE_LIB_MATH=ON 										\
+				-DCREATE_OPTIONAL_CARRIERS=ON								\
+				-DYARP_COMPILE_BINDINGS=ON									\
+				-DCREATE_CSHARP=ON 											\
+				-DCREATE_LUA=ON 											\
+				-DCREATE_PYTHON=ON 											\
+				-DENABLE_yarpcar_bayer=ON 									\
+				-DENABLE_yarpcar_mjpeg=ON 									\
+				-DENABLE_yarpmod_opencv_grabber=ON 							\
+				-DENABLE_yarpmod_serial=ON 									\
+				-DENABLE_yarpmod_serialport=ON 								\
+				-DENABLE_yarpmod_SerialServoBoard=ON 						\
+				-DYARP_USE_PYTHON_VERSION=2								 &&	\
+	cmake .. 	-DCMAKE_BUILD_TYPE=Release 									\
+				-DCREATE_DEVICE_LIBRARY_MODULES=ON 							\
+				-DCMAKE_INSTALL_PREFIX=./install 							\
+				-DCREATE_GUIS=ON 											\
+				-DCREATE_LIB_MATH=ON 										\
+				-DCREATE_OPTIONAL_CARRIERS=ON								\
+				-DYARP_COMPILE_BINDINGS=ON									\
+				-DCREATE_CSHARP=ON 											\
+				-DCREATE_LUA=ON 											\
+				-DCREATE_PYTHON=ON 											\
+				-DENABLE_yarpcar_bayer=ON 									\
+				-DENABLE_yarpcar_mjpeg=ON 									\
+				-DENABLE_yarpmod_opencv_grabber=ON 							\
+				-DENABLE_yarpmod_serial=ON 									\
+				-DENABLE_yarpmod_serialport=ON 								\
+				-DYARP_USE_PYTHON_VERSION=2								&& 	\
+	make -j$cores && make install 
+
+ENV LUA_CPATH=$SRC_FOLDER/yarp/build/lib/lua/?.so  YARP_ROOT=$SRC_FOLDER/yarp
+ENV YARP_DIR=$YARP_ROOT/build/install
+ENV YARP_LIB=$YARP_DIR/lib \
+	YARP_BIN=$YARP_DIR/bin \
+	YARP_ROBOT_NAME=iCubSheffield01
+ENV PATH=$YARP_BIN:$YARP_LIB:$LUA_CPATH:$PATH \
+	LD_LIBRARY_PATH=$YARP_LIB:$LD_LIBRARY_PATH
+
+USER icub
+RUN yarp conf 10.0.0.100 10000
+
+USER root
+RUN echo "source $SRC_FOLDER/yarp/scripts/yarp_completion" >> /home/icub/.sourceScripts

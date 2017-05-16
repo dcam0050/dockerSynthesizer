@@ -1,0 +1,22 @@
+RUN apt-get update && apt-get install -y		\
+	bison 				\
+	flex 				\
+	libpq-dev			\
+	libsqlite3-dev		\
+	postgresql 			\
+	pgadmin3			\
+	python-tk 			
+
+COPY ABM_backup.backup .
+
+RUN echo "postgres:postgres" | chpasswd
+
+USER postgres
+
+RUN /etc/init.d/postgresql start &&\
+    psql --command "alter user postgres with password 'postgres'" && \
+    echo "postgres" | createdb -h localhost -p 5432 -U postgres ABM && \
+    echo "postgres" | /usr/bin/pg_restore 	--host localhost --port 5432 --username "postgres" \
+											--dbname "ABM" --section pre-data --section data \
+											--section post-data --verbose "/usr/local/src/robot/ABM_backup.backup"
+USER root

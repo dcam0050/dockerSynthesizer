@@ -1,0 +1,54 @@
+# SheffTelepresence
+# RUN git clone https://github.com/urielmtz/SheffTelepresence.git
+COPY SheffTelepresence ./SheffTelepresence
+RUN mkdir telepresenceInstall
+
+# Telepresence Vision 
+RUN cd $SRC_FOLDER/SheffTelepresence/telepresence_vision 			&& \
+	mkdir build &&  cd build &&	cmake .. -DCMAKE_INSTALL_PREFIX=$SRC_FOLDER/telepresenceInstall -DCMAKE_BUILD_TYPE=Release && \
+	make -j$cores && make -j$cores install
+
+# Arduino Tactile
+RUN cd $SRC_FOLDER/SheffTelepresence/telepresence_tactile/arduino_tactile_library 											&& \
+	mkdir build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=$SRC_FOLDER/telepresenceInstall -DCMAKE_BUILD_TYPE=Release 	&& \
+	make -j$cores && make -j$cores install
+ENV ARDUINO_TACTILE_ROOT=$SRC_FOLDER/SheffTelepresence/telepresence_tactile/arduino_tactile_library
+
+#Telepresence Tactile
+ENV PATH=$YARP_LIB/yarp:$PATH
+RUN cd $SRC_FOLDER/SheffTelepresence/telepresence_tactile 			&& \
+	mkdir build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=$SRC_FOLDER/telepresenceInstall -DCMAKE_BUILD_TYPE=Release && \
+	make -j$cores && make -j$cores install
+
+#Telepresence Neck
+RUN cd $SRC_FOLDER/SheffTelepresence/telepresence_neck 				&& \
+	mkdir build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=$installDir -DCMAKE_BUILD_TYPE=Release && \
+	make -j$cores && make -j$cores install
+
+RUN cd $SRC_FOLDER/SheffTelepresence/telepresence_neck_gateway 		&& \
+	mkdir build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=$installDir -DCMAKE_BUILD_TYPE=Release && \
+	make -j$cores && make -j$cores install
+
+RUN cd $SRC_FOLDER/SheffTelepresence/telepresence_vision_gateway 	&& \
+	mkdir build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=$installDir -DCMAKE_BUILD_TYPE=Release && \
+	make -j$cores && make -j$cores install
+
+RUN cd $SRC_FOLDER/SheffTelepresence/telepresence_tactile_gateway 	&& \
+	mkdir build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=$installDir -DCMAKE_BUILD_TYPE=Release && \
+	make -j$cores && make -j$cores install
+
+RUN cd $SRC_FOLDER/SheffTelepresence/telepresence_audio/human_side 	&& \
+	mkdir build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=$installDir -DCMAKE_BUILD_TYPE=Release && \
+	make -j$cores && make -j$cores install
+ 
+RUN cd $SRC_FOLDER/SheffTelepresence/telepresence_audio/robot_side 	&& \
+	mkdir build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=$installDir -DCMAKE_BUILD_TYPE=Release && \
+	make -j$cores && make -j$cores install
+
+ENV TELEPRESENCE_DIR=$SRC_FOLDER/telepresenceInstall
+ENV TELEPRESENCE_BIN=$TELEPRESENCE_DIR/bin \
+	TELEPRESENCE_LIB=$TELEPRESENCE_DIR/lib
+ENV PATH=$TELEPRESENCE_BIN:$PATH \
+	LD_LIBRARY_PATH=$TELEPRESENCE_LIB:$LD_LIBRARY_PATH
+
+WORKDIR $SRC_FOLDER

@@ -1,0 +1,18 @@
+# WYSIWYD Year 2
+ARG WysiwydHash=9a8ec307c0ca07be38ab6d1b3af59a246e33e3d7
+RUN git clone https://github.com/robotology/wysiwyd.git && \
+	cd wysiwyd && git checkout -b localBranch $WysiwydHash && cd main && mkdir build && cd build && \
+ 	cmake ..	-DCMAKE_INSTALL_PREFIX=./install 													\
+ 				-DCMAKE_BUILD_TYPE=Release															\
+ 				-DOpenCV_DIR=$SRC_FOLDER/opencv3/build/install/share/OpenCV							\
+ 				-DPYTHON_LIBRARY=$SRC_FOLDER/anaconda2/lib/libpython2.7.so 						&& 	\
+	make -j$cores && make -j$cores install
+
+ENV WYSIWYD_SAM_ROOT=$SRC_FOLDER/wysiwyd/main/src/modules/samRelated 	\
+	WYSIWYD_ROOT=$SRC_FOLDER/wysiwyd/main/build 
+ENV WYSIWYD_DIR=$WYSIWYD_ROOT/install 									\
+	WYSIWYD_BIN=$WYSIWYD_ROOT/install/bin 								\
+	WYSIWYD_LIB=$WYSIWYD_ROOT/install/lib 								\
+	PYTHONPATH=$PYTHONPATH:$WYSIWYD_SAM_ROOT
+ENV LD_LIBRARY_PATH=$WYSIWYD_LIB:$LD_LIBRARY_PATH 						\
+	PATH=$WYSIWYD_BIN:$PATH

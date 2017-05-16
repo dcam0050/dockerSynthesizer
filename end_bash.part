@@ -1,0 +1,13 @@
+WORKDIR /home/icub
+
+COPY Xylo.wav  .
+COPY startup.sh .
+COPY init.sh .
+COPY myprompt /usr/bin/
+RUN chmod +x startup.sh && chmod +x init.sh && rm -rf /var/lib/apt/lists/*
+
+USER root
+RUN chown -R icub /home/icub && chown -R icub $SRC_FOLDER
+
+USER icub
+ENTRYPOINT bash

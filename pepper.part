@@ -1,0 +1,39 @@
+RUN apt-get update && apt-get install -y      	\
+	ros-kinetic-pepper-*                      	\
+	ros-kinetic-pepper-description 			  	\
+	ros-kinetic-pepper-meshes 				  	\
+	ros-kinetic-pepper-control					\
+	ros-kinetic-pepper-gazebo-plugin 			\
+    ros-kinetic-naoqi-pose                    	\
+    ros-kinetic-find-object-2d                	\
+    ros-kinetic-humanoid-msgs                 	\
+    ros-kinetic-move-base-msgs                	\
+    ros-kinetic-octomap-msgs                  
+
+ARG version=2.5.5.5-linux64
+ARG naoqic=naoqi-sdk-$version
+ARG naoqipy=pynaoqi-python2.7-$version
+
+COPY $naoqic.tar.gz ./$naoqic.tar.gz
+COPY $naoqipy.tar.gz ./$naoqipy.tar.gz
+
+RUN tar xvzf $naoqic.tar.gz && tar xvzf $naoqipy.tar.gz && \
+    rm $naoqic.tar.gz && rm $naoqipy.tar.gz 			&& \
+    mv $naoqic naoqi-sdk && mv $naoqipy pynaoqi 		&& \
+    pip install netifaces
+
+ENV PYTHONPATH $PYTHONPATH:$SRC_FOLDER/pynaoqi/
+
+WORKDIR $SRC_FOLDER/catkin_ws/src
+
+RUN git clone https://github.com/ykoga-kyutech/pepper_ros_handson.git && \
+	git clone https://github.com/roboticsgroup/roboticsgroup_gazebo_plugins.git && \
+	git clone https://github.com/pal-robotics/pal_msgs.git
+
+RUN mv /bin/sh /bin/sh.old && ln -s /bin/bash /bin/sh
+
+RUN cd $SRC_FOLDER/catkin_ws && source /opt/ros/kinetic/setup.sh && catkin_make 
+RUN rm /bin/sh && mv /bin/sh.old /bin/sh
+
+WORKDIR $SRC_FOLDER
+

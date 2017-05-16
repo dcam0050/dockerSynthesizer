@@ -1,0 +1,35 @@
+# TELERPRESENCE PERIPHERALS
+RUN apt-get update && apt-get install -y 	\
+	libglew-dev 							\
+	arduino 								\
+	pulseaudio-utils 						\
+	libsdl2-dev
+
+# Oculus Drivers
+ARG ovr4=ovr_sdk_linux_0.4.4
+ARG ovr5=ovr_sdk_linux_0.5.0.1
+
+#Setup Oculus Drivers
+COPY $ovr4.tar.xz  ./ovr4tar
+COPY $ovr5.tar.xz ./ovr5tar
+RUN tar -xvf ovr4tar && tar -xvf ovr5tar && mv $ovr5 ovr5 && mv $ovr4 ovr4 && rm ovr4tar ovr5tar 	&& 	\
+	cd $SRC_FOLDER/ovr5 && ./ConfigureDebian.sh 													&& 	\
+	make -j$cores debug && make -j$cores release 													&& 	\
+	cp ./Tools/RiftConfigUtil/Bin/Linux/x86_64/ReleaseStatic/RiftConfigUtil . 						&& 	\
+	cp ./Service/OVRServer/Bin/Linux/x86_64/ReleaseStatic/ovrd .
+
+ENV OCULUS_SERVER=$SRC_FOLDER/ovr5 \
+	OCULUS_DEMO=$SRC_FOLDER/ovr5/Samples/OculusWorldDemo/Bin/x86_64/Release
+
+ENV OCULUS_DIR=$SRC_FOLDER/ovr4/LibOVR
+RUN cd $OCULUS_DIR && make -j$cores
+ENV OCULUS_LIB=$OCULUS_DIR/Lib/Linux/Release/x86_64 OCULUS_ROOT=$OCULUS_DIR/Src 
+ENV OCULUS_INCLUDE_DIR=$OCULUS_DIR/Include:OCULUS_ROOT=$OCULUS_DIR/Src
+
+ENV PATH=$OCULUS_SERVER:$OCULUS_INCLUDE_DIR:$OCULUS_DIR:$OCULUS_ROOT:$PATH
+ENV LD_LIBRARY_PATH=$OCULUS_LIB:$LD_LIBRARY_PATH
+
+RUN cp $OCULUS_LIB/libovr.a /usr/local/lib &&	\
+	cp $ICUB_ROOT/build/lib/libicubmod.a $ICUB_LIB && \
+	ln -s $YARP_LIB/yarp/yarp_serial.so $YARP_LIB/yarp/libyarp_serial.so && \
+	mkdir -p /home/icub/.config

@@ -1,0 +1,64 @@
+#OpenCV 2
+RUN apt-get update && apt-get install -y \
+	libgtk2.0-dev 		\
+	libavcodec-dev 		\
+	libavformat-dev 	\
+	libswscale-dev 		\
+	libtbb2 			\
+	libtbb-dev 			\
+	libjpeg-dev 		\
+	libpng-dev 			\
+	libtiff-dev 		\
+	libjasper-dev 		\
+	libdc1394-22-dev 	\
+	libopenblas-dev 	\
+	liblapack-dev 		\
+	liblapacke-dev 		\
+	libboost-all-dev 	\
+	libeigen3-dev 		\
+	libatlas-dev		\
+	libprotobuf-dev 	\
+	protobuf-compiler	\
+	libgoogle-glog-dev	\
+	libgflags-dev		\
+	libleveldb-dev		\
+	libhdf5-serial-dev	\
+	liblmdb-dev			\
+	libsnappy-dev		\
+	hdf5-tools 			\
+	libatlas-base-dev 	\
+	libatlas3-base		
+
+ARG opencv2Hash=d68e3502278d6fc5a1de0ce8f7951d9961b20913
+RUN git clone https://github.com/opencv/opencv.git ./opencv2 && cd opencv2 && git checkout -b localBranch $opencv2Hash && \
+	mkdir build && cd build && mkdir ./install 							&& 	\
+	cmake .. 	-DCMAKE_BUILD_TYPE=Release 									\
+				-DBUILD_PERF_TESTS=OFF 										\
+				-DCMAKE_INSTALL_PREFIX=./install 							\
+				-DBUILD_TESTS=OFF 											\
+				-DCUDA_ARCH_BIN="6.0 6.1" 									\
+				-DCUDA_FAST_MATH=ON 										\
+				-DWITH_CUBLAS=ON 											\
+				-DWITH_QT=ON 												\
+				-DWITH_TIFF=OFF 											\
+				-DWITH_TBB=ON 											&& 	\
+	make -j$cores && make -j$cores install
+
+#Caffe
+ARG caffeHash=68215ccc004ebd05a2209270688c26b6e4304d4a
+RUN git clone https://github.com/BVLC/caffe.git && \
+	cd caffe && git checkout -b localBranch $caffeHash && mkdir build 	&& cd build	&& 	\
+	cmake .. 	-DCMAKE_BUILD_TYPE=Release									\
+				-DCMAKE_INSTALL_PREFIX=./install 							\
+				-DOpenCV_DIR=$SRC_FOLDER/opencv2/build/install/share/OpenCV \
+				-DCUDA_USE_STATIC_CUDA_RUNTIME=OFF 						&& 	\
+	make -j$cores && make -j$cores install 								&& 	\
+	cd .. && scripts/download_model_binary.py models/bvlc_reference_caffenet && \
+	./data/ilsvrc12/get_ilsvrc_aux.sh
+
+ENV CAFFE_ROOT=$SRC_FOLDER/caffe/build 
+ENV CAFFE_DIR=$CAFFE_ROOT/install
+ENV CAFFE_LIB=$CAFFE_DIR/lib 	\
+	CAFFE_BIN=$CAFFE_DIR/bin
+ENV PATH=$CAFFE_BIN:$PATH 		\
+	LD_LIBRARY_PATH=$CAFFE_LIB:$LD_LIBRARY_PATH

@@ -1,0 +1,24 @@
+RUN apt-get update && apt-get install -y	\
+	usbutils 								\
+	libopenni-dev
+
+#NITE
+ARG NITED=NITE-Bin-Dev-Linux-x64-v1.5.2.21
+ARG NITEZ=nite-bin-linux-x64-v1.5.2.21.tar.bz2
+RUN wget http://ilab.usc.edu/packages/forall/ubuntu-12.04lts/old/nite-bin-linux-x64-v1.5.2.21.tar.bz2 && \
+	tar xvfj $NITEZ && cd $NITED && ./install.sh && rm $SRC_FOLDER/$NITEZ
+
+#SensorKinect
+ARG sensorKinectHash=15f1975d5e50d84ca06ff784f83f8b7836749a7b
+RUN git clone https://github.com/avin2/SensorKinect.git && \
+	cd SensorKinect && git checkout -b localBranch $sensorKinectHash && \
+	cd Platform/Linux/CreateRedist && ./RedistMaker && cd ../Redist/Sensor-Bin-Linux-x64-v5.1.2.1/ && ./install.sh
+
+#kinectWrapper
+ARG kinectHash=20113eae69e3e16e69048d7debd2d02dee591425
+RUN git clone https://github.com/robotology/kinect-wrapper.git && \
+	cd kinect-wrapper && git checkout -b localBranch $kinectHash && mkdir build && cd build && 	\
+	cmake .. 	-DCMAKE_BUILD_TYPE=RELEASE 														\
+				-DCMAKE_INSTALL_PREFIX=$CMAKE_PREFIX_PATH 										\
+				-DOpenCV_DIR=$SRC_FOLDER/opencv3/build/install/share/OpenCV 				&& 	\
+	make -j$cores && make -j$cores install

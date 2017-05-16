@@ -1,0 +1,73 @@
+RUN apt-get update && apt-get install -y \
+	libglew-dev 		\
+	libdevil-dev		
+
+#rFSM
+ARG rFSMHash=26d0477053597690ab1d941f26041492ddfced9b
+RUN git clone https://github.com/kmarkus/rFSM.git && cd rFSM && git checkout -b localBranch $rFSMHash
+
+# Segmentation
+ARG segmentationHash=0a6666ce44304a9cf52c49e4871a1fb835896200
+RUN git clone https://github.com/robotology/segmentation.git && \
+	cd segmentation && git checkout -b localBranch $segmentationHash && mkdir build && \
+	cd build && cmake .. -DCMAKE_INSTALL_PREFIX=$CMAKE_PREFIX_PATH && make -j$cores && make -j$cores install
+
+#SiftGPU
+ARG siftGPUHash=b46bd5b8cc5cfdc1dc163444b72c705569800b6d
+RUN git clone https://github.com/pitzer/SiftGPU.git && \
+	cd SiftGPU && git checkout -b localBranch $siftGPUHash && make clean && make
+
+ENV SIFTGPU_ROOT=$SRC_FOLDER/SiftGPU
+ENV SIFTGPU_BIN=$SIFTGPU_ROOT/bin \
+	SIFTGPU_LIB=$SIFTGPU_ROOT/lib \
+	SIFTGPU_INCLUDE_DIRS=$SIFTGPU_ROOT/src/SiftGPU/
+ENV LUA_PATH=$SRC_FOLDER/rFSM/?.lua:$ICUBCONTRIB_DIR/share/ICUBcontrib/contexts/iol/lua/?.lua?
+ENV PATH=$SIFTGPU_BIN:$SIFTGPU_INCLUDE_DIRS:$PATH \
+	LD_LIBRARY_PATH=$SIFTGPU_LIB:$LIBSVMLIN_DIR:$LUA_PATH:$LD_LIBRARY_PATH
+
+#LIBLINEAR
+RUN git clone https://github.com/robotology/himrep.git && \
+	cd himrep && wget https://www.csie.ntu.edu.tw/~cjlin/liblinear/oldfiles/liblinear-1.91.tar.gz 
+RUN cd himrep && tar xvzf liblinear-1.91.tar.gz && rm liblinear-1.91.tar.gz
+RUN cd himrep/liblinear-1.91 && mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=RELEASE && make && cp libLiblinear.a ../
+ENV LIBSVMLIN_DIR=$SRC_FOLDER/himrep/liblinear-1.91
+
+# Himrep
+ARG himrepHash=c1e4b0509da512ee4e9234d77148bf18fe228ad8
+RUN cd himrep && git checkout -b localBranch $himrepHash && mkdir build && cd build && 	\
+	cmake .. 	-DCMAKE_BUILD_TYPE=RELEASE 									\
+				-DOpenCV_DIR=$SRC_FOLDER/opencv2/build/install/share/OpenCV \
+				-DSIFTGPU_DIR=$SIFTGPU_ROOT 								\
+				-DSIFTGPU_LIBRARIES=$SIFTGPU_BIN/libsiftgpu.so 				\
+				-DSIFTGPU_INCLUDE_DIRS=$SIFTGPU_INCLUDE_DIRS				\
+				-DCMAKE_INSTALL_PREFIX=$CMAKE_PREFIX_PATH					\
+				-DCUDA_USE_STATIC_CUDA_RUNTIME=OFF 						&& 	\
+	make -j$cores && make -j$cores install
+
+#Stereo Vision
+ARG stereoHash=a5b8e2599916ac1a83e7f89ac94d15d087ef3a59
+RUN git clone https://github.com/robotology/stereo-vision.git && \
+	cd stereo-vision && git checkout -b localBranch $stereoHash && mkdir build && cd build 	&& 	\
+	cmake .. 	-DCMAKE_BUILD_TYPE=RELEASE 														\
+				-DUSE_SIFT_GPU=OFF 																\
+				-DOpenCV_DIR=$SRC_FOLDER/opencv3/build/install/share/OpenCV 					\
+				-DCUDA_USE_STATIC_CUDA_RUNTIME=OFF												\
+				-DCMAKE_INSTALL_PREFIX=$CMAKE_PREFIX_PATH 									&& 	\
+	make -j$cores && make -j$cores install
+
+#Boost
+ARG boostHash=fbe3e245a0b1aecfda960c1d7a254a1deeb58022
+RUN git clone https://github.com/robotology/boost-mil.git && \
+	cd boost-mil && git checkout -b localBranch $boostHash && mkdir build && cd build 	&& 	\
+	cmake .. 	-DCMAKE_BUILD_TYPE=RELEASE 													\
+				-DCMAKE_INSTALL_PREFIX=$CMAKE_PREFIX_PATH 								&& 	\
+	make -j$cores && make -j$cores install
+
+#IOL
+ARG iolHash=60b608ecced5c32933449d4b67c367f16221a815
+RUN git clone https://github.com/robotology/iol.git && \
+	cd iol && git checkout -b localBranch $iolHash && mkdir build && cd build 	&& 	\
+	cmake .. 	-DCMAKE_BUILD_TYPE=RELEASE 											\
+				-DCMAKE_INSTALL_PREFIX=$CMAKE_PREFIX_PATH 							\
+				-DOpenCV_DIR=$SRC_FOLDER/opencv3/build/install/share/OpenCV 	&& 	\
+	make -j$cores && make -j$cores install

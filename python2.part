@@ -1,0 +1,12 @@
+#Python
+RUN cd $SRC_FOLDER && wget https://repo.continuum.io/archive/Anaconda2-4.2.0-Linux-x86_64.sh && \
+	cd $SRC_FOLDER && bash Anaconda2-4.2.0-Linux-x86_64.sh -b -p ./anaconda2 	&& 	\
+	rm $SRC_FOLDER/anaconda2/lib/libgomp.so* 									&& 	\
+	rm $SRC_FOLDER/anaconda2/lib/libstdc++.so* 									&& 	\
+	rm $SRC_FOLDER/anaconda2/lib/libgfortran.so* 								&& 	\
+	rm $SRC_FOLDER/anaconda2/lib/libQt5*										&& 	\
+	rm -r $SRC_FOLDER/anaconda2/lib/cmake/Qt5* 									&& 	\
+	rm $SRC_FOLDER/Anaconda2-4.2.0-Linux-x86_64.sh
+
+ENV PYTHONPATH=$SRC_FOLDER/anaconda2/bin 
+ENV PATH=$PYTHONPATH:$PATH
