@@ -1,16 +1,12 @@
-.PHONY: build first_run run clean docker build_image configure makeContainer buildBashrc
+.PHONY: build first_run run clean docker configure build_image buildBashrc uploadImage upload
 
-tagName := dcamilleri13/pepper-gazebo:kinetic
-containerName := pepper-gazebo-kinetic
+tagName := dcamilleri13/icub-client
+containerName := icub-client
 #scan parts directory
 INPUTS := $(wildcard ${DOCKERPARTS}/*.part)
 HOST=$(shell hostname)
 
-build: clean docker build_image
-
-build_image:
-	nvidia-docker build -t $(tagName) .
-	paplay ${BEEP}
+build: clean docker build_image buildBashrc build_image1
 
 run:
 	nvidia-docker start $(containerName)
@@ -20,6 +16,7 @@ clean:
 	@rm -f bashrc_iCub
 	@rm -f Dockerfile
 	-@docker rm -f $(containerName) >/dev/null || true
+	touch bashrc_iCub
 
 docker:
 	${DOCKERPARTS}/compileDockerfile.py $(PWD)
@@ -28,27 +25,39 @@ configure:
 	sudo apt-get install -y libopenni-dev squid-deb-proxy
 
 
-
-first_run: makeContainer buildBashrc
-
-makeContainer:
-	-@docker stop $(containerName) >/dev/null || true
-	-@docker rm $(containerName) >/dev/null || true
-	touch bashrc_iCub
-
-	nvidia-docker run -it --env="DISPLAY="${DISPLAY} --env="QT_X11_NO_MITSHM=1" 					\
+first_run:
+	nvidia-docker run -dit --env="DISPLAY="${DISPLAY} --env="QT_X11_NO_MITSHM=1" 					\
 					  --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" 									\
 					  --volume=/dev/snd:/dev/snd													\
-					  --volume="/home/daniel/.local/share/yarp:/home/icub/.local/share/yarp:rw" 	\
-					  --volume=$(PWD)/bashrc_iCub:/home/icub/.bashrc_iCub:rw 						\
+					  --volume="/home/$(USER)/.local/share/yarp:/home/icub/.local/share/yarp:rw" 	\
 					  --volume="/dev/bus/usb:/dev/bus/usb"											\
 					  --name=${containerName} 														\
 					  --hostname=$(HOST)															\
 					  --network=host																\
 					  --privileged 																	\
 					  $(tagName)
+	nvidia-docker stop $(containerName)
+	#set up display
+	@xhost +local:`docker inspect --format='{{ .Config.Hostname }}' $(containerName)`
+	nvidia-docker start $(containerName)
+	nvidia-docker attach $(containerName)
 
+build_image build_image1:
+	nvidia-docker build -t $(tagName) .
+	-@docker stop $(containerName) >/dev/null || true
+	-@docker rm $(containerName) >/dev/null || true
 
+	nvidia-docker run -dit --env="DISPLAY="${DISPLAY} --env="QT_X11_NO_MITSHM=1" 					\
+					  --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" 									\
+					  --volume=/dev/snd:/dev/snd													\
+					  --volume="/home/$(USER)/.local/share/yarp:/home/icub/.local/share/yarp:rw" 	\
+					  --volume="/dev/bus/usb:/dev/bus/usb"											\
+					  --name=${containerName} 														\
+					  --hostname=$(HOST)															\
+					  --network=host																\
+					  --privileged 																	\
+					  $(tagName)
+	nvidia-docker stop $(containerName)
 	#set up display
 	@xhost +local:`docker inspect --format='{{ .Config.Hostname }}' $(containerName)`
 
@@ -61,4 +70,10 @@ buildBashrc:
 	@echo "source ~/.sourceScripts" >> bashrc_iCub
 	@echo "environment written to bashrc_iCub"
 
-all: build first_run run
+all: build run
+
+upload: build uploadImage
+
+uploadImage: 
+	docker push $(tagName)
+

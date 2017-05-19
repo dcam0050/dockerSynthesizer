@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 DIR="/home/icub/.local/share/yarp/contexts/himrep/IOL2OPCDatabase"
+sudo service ssh start
+sudo service postgresql start
 
 if sudo service ssh status | grep not
 then 

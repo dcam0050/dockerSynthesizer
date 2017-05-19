@@ -13,5 +13,8 @@ RUN ssh-keygen -t rsa -f /home/icub/.ssh/id_rsa -q -N "" && touch .ssh/authorize
 USER root
 RUN chown -R icub /home/icub && chown -R icub $SRC_FOLDER
 
+COPY bashrc_iCub /home/icub/.bashrc_iCub
+RUN chown -R icub /home/icub/.bashrc_iCub
+
 USER icub
-ENTRYPOINT sudo service ssh start && bash
+ENTRYPOINT bash

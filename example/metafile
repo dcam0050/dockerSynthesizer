@@ -5,15 +5,21 @@ yarp_telepresence
 icub-main
 caffe
 iol
-ros-kinetic
-baxter-kinetic
-pepper
-icub-gazebo
 kinect
 postgresql
 SAM
 speech
+karma
+# wysiwydYr2
+# wysiwydYr3
 icub-client
-telepresence_peripherals
-SheffTelepresence
-end_ssh_postgres
+humanSensing
+localYarpBackup
+SAM_Data
+# telepresence_peripherals
+# SheffTelepresence
+# ros-kinetic
+# baxter-kinetic
+# icub-gazebo
+# pepper
+end_ssh
