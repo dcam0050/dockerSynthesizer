@@ -5,6 +5,7 @@ RUN git clone https://github.com/robotology/wysiwyd.git && \
  	cmake ..	-DCMAKE_INSTALL_PREFIX=./install 													\
  				-DCMAKE_BUILD_TYPE=Release															\
  				-DOpenCV_DIR=$SRC_FOLDER/opencv3/build/install/share/OpenCV							\
+ 				-DWYSIWYD_USE_PGSQL=ON 																\
  				-DPYTHON_LIBRARY=$SRC_FOLDER/anaconda2/lib/libpython2.7.so 						&& 	\
 	make -j$cores && make -j$cores install
 

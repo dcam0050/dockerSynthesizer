@@ -36,25 +36,26 @@ if variableName in os.environ :
 					goAhead = False
 					sys.exit("Metafile line " + str(count) + ": " + j + ".part not found in " + partsDir)
 			else:
-				currPart = join(partsDir,j+".part")
-				print currPart
-				sect = open(currPart, 'r')
-				sections += [sect.read()]
-				sect.close()
-				#check for COPY and ADD in section to make list of files to copy over
-				sectionLines = sections[-1].split('\n')
-				extraFileLines = [k for k in sectionLines if "COPY" in k or "ADD" in k]
-				currExtraFiles = [k.split(' ')[1] for k in extraFileLines]
-				#check all extra files are present
-				verifiedFiles = []
-				for k in currExtraFiles:
-					if not isfile(join(rootDir,extraFilesDir,k)):
-						print "Warning: Extra file " + k + " for line " + str(count) + " not found in " + join(partsDir,extraFilesDir)
-					else:
-						verifiedFiles += [k]
-				print verifiedFiles
-				extraFiles += verifiedFiles
-				count += 1
+				if '#' not in j:
+					currPart = join(partsDir,j+".part")
+					print currPart
+					sect = open(currPart, 'r')
+					sections += [sect.read()]
+					sect.close()
+					#check for COPY and ADD in section to make list of files to copy over
+					sectionLines = sections[-1].split('\n')
+					extraFileLines = [k for k in sectionLines if "COPY" in k or "ADD" in k]
+					currExtraFiles = [k.split(' ')[1] for k in extraFileLines]
+					#check all extra files are present
+					verifiedFiles = []
+					for k in currExtraFiles:
+						if not isfile(join(rootDir,extraFilesDir,k)):
+							print "Warning: Extra file " + k + " for line " + str(count) + " not found in " + join(partsDir,extraFilesDir)
+						else:
+							verifiedFiles += [k]
+					print verifiedFiles
+					extraFiles += verifiedFiles
+					count += 1
 
 		print "Metafile parsed"
 		try:

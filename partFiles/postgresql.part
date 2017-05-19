@@ -7,7 +7,19 @@ RUN apt-get update && apt-get install -y		\
 	pgadmin3			\
 	python-tk 			
 
+ARG postgresHash=a3c643938166abed9a390cdbd8a5df09bfe39523
+RUN git clone https://github.com/postgres/postgres.git && \
+	cd postgres && git checkout -b localBranch $postgresHash && \
+	./configure && make -j$cores && make -j$cores install
+
+ENV PGSQL_ROOT=$SRC_FOLDER/postgres
+
 COPY ABM_backup.backup .
+
+ENV PGSQL_ROOT=$SRC_FOLDER/postgresql
+ENV PGSQL_DIR=/usr/local/pgsql
+ENV PGSQL_LIB=$PGSQL_DIR/lib \
+	PGSQL_BIN=$PGSQL_DIR/bin
 
 RUN echo "postgres:postgres" | chpasswd
 
