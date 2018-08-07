@@ -6,7 +6,7 @@ RUN git clone https://github.com/robotology/speech.git && \
 				-DCMAKE_INSTALL_PREFIX=$CMAKE_PREFIX_PATH 							&& 	\
 	make -j$cores && make -j$cores install
 
-ENV YARP_DATA_DIRS=$YARP_DIR/share/yarp:$ICUB_DIR/share/iCub:$ICUBCONTRIB_DIR/share/ICUBcontrib:$ICUBCONTRIB_DIR/share/speech:$ICUB_ROOT/app/simConfig/conf \
+ENV YARP_DATA_DIRS=$YARP_DATA_DIRS:$ICUBCONTRIB_DIR/share/speech \
 	YARP_PYTHONLIB=$YARP_LIB/python2.7/site-packages
 
 RUN cd speech/svox-speech && mkdir build &&	cd build && 		\

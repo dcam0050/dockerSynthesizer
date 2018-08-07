@@ -1,0 +1,73 @@
+RUN apt-get update && apt-get install -y      	\
+    ros-kinetic-gazebo-plugins                  \
+    ros-kinetic-gazebo-ros-pkgs                 \
+    ros-kinetic-gazebo-ros                      \
+    ros-kinetic-gazebo-ros-control              \       
+    ros-kinetic-moveit
+
+ARG version=2.5.5.5-linux64
+ARG naoqic=naoqi-sdk-$version
+ARG naoqipy=pynaoqi-python2.7-$version
+
+#COPY $naoqic.tar.gz ./$naoqic.tar.gz
+COPY $naoqipy.tar.gz ./$naoqipy.tar.gz
+
+#RUN tar xzf $naoqic.tar.gz && tar xzf $naoqipy.tar.gz   && \
+#   rm $naoqic.tar.gz && rm $naoqipy.tar.gz 			&& \
+#    mv $naoqic naoqi-sdk && mv $naoqipy pynaoqi && chown -R icub pynaoqi && \
+#    pip install netifaces
+
+RUN tar xzf $naoqipy.tar.gz   && \
+    rm $naoqipy.tar.gz 			&& \
+    mv $naoqipy pynaoqi && chown -R icub pynaoqi && \
+    pip install netifaces
+
+ENV PYTHONPATH=$PYTHONPATH:$SRC_FOLDER/pynaoqi/lib/python2.7/site-packages
+ENV CATKIN_ROOT $SRC_FOLDER/catkin_ws
+ENV CATKIN_SOURCE $CATKIN_ROOT/devel/setup.bash
+
+WORKDIR $SRC_FOLDER/catkin_ws/src
+
+ARG roboticsgroup_gazebo_pluginsHash=2f2f7f19669f9470692925bb3cc79c99e68cc011
+ARG pal_msgsHash=8a3ee9811c9dc8133d163225b39199217636abfe
+ARG pal_gazebo_pluginsHash=c13d52145d6331a74d16179d7b5abe8d7f381385
+
+# RUN git clone https://github.com/roboticsgroup/roboticsgroup_gazebo_plugins.git && cd roboticsgroup_gazebo_plugins && git checkout -b localBranch $roboticsgroup_gazebo_pluginsHash
+# RUN git clone https://github.com/pal-robotics/pal_msgs.git && cd pal_msgs && git checkout -b localBranch $pal_msgsHash
+
+RUN git clone https://github.com/roboticsgroup/roboticsgroup_gazebo_plugins.git && cd roboticsgroup_gazebo_plugins
+RUN git clone https://github.com/pal-robotics/pal_msgs.git && cd pal_msgs && git checkout -b localBranch $pal_msgsHash
+#RUN git clone https://github.com/pal-robotics/pal_gazebo_plugins.git && cd pal_gazebo_plugins && git checkout -b localBranch $pal_gazebo_pluginsHash
+
+
+RUN apt-get update && apt-get install -y        \
+    ros-kinetic-pepper-meshes                   \
+    ros-kinetic-moveit-visual-tools             \
+    ros-kinetic-pepper-moveit-config            \
+    ros-kinetic-humanoid-nav-msgs               \
+    ros-kinetic-naoqi-dcm-driver                \
+    ros-kinetic-naoqi-libqi                     \
+    ros-kinetic-naoqi-libqicore                 \
+    ros-kinetic-naoqi-pose                      \
+    ros-kinetic-find-object-2d                  \
+    ros-kinetic-humanoid-msgs                   \
+    ros-kinetic-move-base-msgs                  \
+    ros-kinetic-octomap-msgs
+
+RUN git clone https://github.com/dcam0050/pepper_virtual.git
+RUN git clone https://github.com/dcam0050/pepper_robot.git
+RUN git clone https://github.com/ros-naoqi/pepper_dcm_robot
+
+RUN cd $SRC_FOLDER/catkin_ws && \
+    /bin/bash -c 'source /opt/ros/kinetic/setup.sh; source /usr/local/src/robot/catkin_ws/devel/setup.bash; catkin_make'
+
+WORKDIR $SRC_FOLDER
+
+
+# if (CMAKE_VERSION VERSION_LESS "3.1")
+#     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+#       set (CMAKE_CXX_FLAGS "-std=gnu++11 ${CMAKE_CXX_FLAGS}")
+#     endif ()
+#   else ()
+#     set (CMAKE_CXX_STANDARD 11)
+#   endif ()

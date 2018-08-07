@@ -1,0 +1,44 @@
+#!/bin/bash
+sudo echo 'network={
+    ssid="testing"
+    psk="testingPassword"
+}' >> /etc/wpa_supplicant/wpa_supplicant.conf
+
+wpa_cli -i wlan0 reconfigure
+ifconfig wlan0
+
+echo "Press enter to install additional libraries"
+read rt
+sudo apt-get update
+sudo apt-get dist-upgrade
+sudo apt-get upgrade
+sudo apt-get install build-essential pkg-config git cmake cmake-curses-gui libeigen3-dev libace-dev libedit-dev swig libeigen3-dev 
+
+#OpenCV dependencies
+echo "Press enter to install OpenCV dependencies"
+read rt
+sudo apt-get install libjpeg-dev libtiff5-dev libjasper-dev libpng12-dev libavcodec-dev libavformat-dev libswscale-dev libv4l-dev libxvidcore-dev libx264-dev libatlas-base-dev gfortran
+
+# python berryconda setup
+echo "Press enter to install python and additional python libraries"
+read rt
+wget https://github.com/jjhelmus/berryconda/releases/download/v2.0.0/Berryconda2-2.0.0-Linux-armv7l.sh
+chmod +x Berryconda2-2.0.0-Linux-armv7l.sh
+./Berryconda2-2.0.0-Linux-armv7l.sh
+conda install numpy scipy pyzmq tornado simplegeneric scandir matplotlib scikit-learn psutil
+pip install paramz==0.7.4 ipyparallel
+
+
+git clone https://github.com/robotology/yarp.git && cd yarp && git checkout -b localBranche51a52d94076ccea63a695425d9ce02a1491e9dc
+#compile python bindings
+
+
+git clone https://github.com/SheffieldML/GPy.git && cd GPy && git checkout -b localBranch 845168af3bb5e61dafed4dd860644546e9c4666a && python setup.py build_ext --inplace
+
+git clone https://github.com/SheffieldML/GPyOpt.git && cd GPyOpt && git checkout -b localBranch dd1438023e9d133af0c861a9a3c3fd24a5fa07bd && python setup.py develop
+
+echo 'YARP_PYTHONLIB=/usr/local/lib/python2.7/site-packages'  >> ~/.bashrc
+echo 'GPY_ROOT=/home/pi/installation/GPy' >> ~/.bashrc
+echo 'GPYOPT_ROOT=/home/pi/installation/GPyOpt' >> ~/.bashrc
+echo 'SAM_ROOT=/home/pi/installation' >> ~/.bashrc
+echo 'PYTHONPATH=$YARP_PYTHONLIB:$GPY_ROOT:$SAM_ROOT:$GPYOPT_ROOT' >> ~/.bashrc

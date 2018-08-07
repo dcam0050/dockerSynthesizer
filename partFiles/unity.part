@@ -1,0 +1,78 @@
+ARG VIDEO_GID
+
+RUN groupadd unity3ddockervideo && \
+	usermod -aG unity3ddockervideo icub
+
+ARG PACKAGE=unity-editor_amd64-2017.1.1xf1Linux.deb
+# ARG PACKAGE=unity-editor-5.4.0f3+20160727_amd64.deb
+
+
+RUN mkdir unity3d
+WORKDIR unity3d
+
+ADD unity-editor_amd64-2017.1.1xf1Linux.deb ${PACKAGE}
+# ADD unity-editor-5.4.0f3+20160727_amd64.deb ${PACKAGE}
+
+ADD google-chrome-stable_current_amd64.deb /src/google-chrome-stable_current_amd64.deb
+
+RUN apt-get update
+RUN dpkg -i ${PACKAGE} || apt-get -f install -y
+
+#Install unity3d
+RUN dpkg -i ${PACKAGE}
+RUN rm ${PACKAGE}
+
+RUN chown root /opt/Unity/Editor/chrome-sandbox
+RUN chmod 4755 /opt/Unity/Editor/chrome-sandbox
+
+RUN mkdir -p /usr/share/icons/hicolor && \
+	apt-get update && apt-get install -y \
+	software-properties-common \
+	ca-certificates \
+  	fonts-liberation \
+	gconf-service \
+	hicolor-icon-theme \
+	libappindicator1 \
+	libasound2 \
+	libcanberra-gtk-module \
+	libcurl3 \
+	libexif-dev \
+	libgconf-2-4 \
+	libgl1-mesa-dri \
+	libgl1-mesa-glx \
+	libnspr4 \
+	libnss3 \
+	libpango1.0-0 \
+	libv4l-0 \
+  	libxcb1 \
+  	libxcb-render0 \
+  	libxcb-shm0 \
+	libxss1 \
+	libxtst6 \
+  	mono-complete \
+  	monodevelop \
+	wget \
+	xdg-utils \
+	ffmpeg \
+	sudo \
+	--no-install-recommends && \
+	dpkg -i '/src/google-chrome-stable_current_amd64.deb'
+
+WORKDIR /home/icub
+RUN mkdir -p .local/share/unity3d/Unity 	&&	\
+	mkdir -p .cache/unity3d 				&&	\
+	mkdir -p .config/unity3d/Preferences
+
+# ADD Unity-Yarp-Integration.tar.gz .
+
+# ARG pluginsFolder=/home/icub/Plugins/
+
+# Remove everything in Plugins Folder of extracted unity project and substitute with local yarp install
+# RUN mkdir $pluginsFolder												&& 	\
+# 	cp $SRC_FOLDER/yarp/build/bindings/*.cs 		$pluginsFolder		&&	\
+# 	cp $SRC_FOLDER/yarp/build/bindings/yarp* 		$pluginsFolder		&&	\
+# 	cp $SRC_FOLDER/yarp/build/lib/libyarp_cs.so 	$pluginsFolder 		&&	\
+# 	cp $pluginsFolder/libyarp_cs.so $pluginsFolder/yarp_cs.so
+
+# RUN chown icub -R $(ls -d .c* .l* *)
+WORKDIR $SRC_FOLDER

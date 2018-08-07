@@ -1,0 +1,59 @@
+RUN apt-get update && apt-get install -y      	 \
+    ros-kinetic-gazebo8-plugins                  \
+    ros-kinetic-gazebo8-ros-pkgs                 \
+    ros-kinetic-gazebo8-ros                      \
+    ros-kinetic-gazebo8-ros-control              
+
+ARG version=2.5.5.5-linux64
+ARG naoqic=naoqi-sdk-$version
+ARG naoqipy=pynaoqi-python2.7-$version
+
+COPY $naoqic.tar.gz ./$naoqic.tar.gz
+COPY $naoqipy.tar.gz ./$naoqipy.tar.gz
+
+RUN tar xzf $naoqic.tar.gz && tar xzf $naoqipy.tar.gz && \
+    rm $naoqic.tar.gz && rm $naoqipy.tar.gz 			&& \
+    mv $naoqic naoqi-sdk && mv $naoqipy pynaoqi 		&& \
+    pip install netifaces
+
+ENV PYTHONPATH=$PYTHONPATH:$SRC_FOLDER/pynaoqi/lib/python2.7/site-packages
+
+WORKDIR $SRC_FOLDER/catkin_ws/src
+
+ARG roboticsgroup_gazebo_pluginsHash=2f2f7f19669f9470692925bb3cc79c99e68cc011
+ARG pal_msgsHash=8a3ee9811c9dc8133d163225b39199217636abfe
+ARG pal_gazebo_pluginsHash=c13d52145d6331a74d16179d7b5abe8d7f381385
+
+RUN git clone https://github.com/roboticsgroup/roboticsgroup_gazebo_plugins.git && cd roboticsgroup_gazebo_plugins && git checkout -b localBranch $roboticsgroup_gazebo_pluginsHash
+RUN git clone https://github.com/pal-robotics/pal_msgs.git && cd pal_msgs && git checkout -b localBranch $pal_msgsHash
+# RUN git clone https://github.com/pal-robotics/pal_gazebo_plugins.git && cd pal_gazebo_plugins && git checkout -b localBranch $pal_gazebo_pluginsHash
+
+RUN apt-get update && apt-get install -y        \  
+    ros-kinetic-pepper-description              \
+    ros-kinetic-pepper-meshes                   \
+    ros-kinetic-pepper-control                  \   
+    ros-kinetic-humanoid-nav-msgs                
+    # ros-kinetic-pepper-*                          \
+    # ros-kinetic-naoqi-pose                        \
+    # ros-kinetic-find-object-2d                    \
+    # ros-kinetic-humanoid-msgs                     \
+    # ros-kinetic-move-base-msgs                    \
+    # ros-kinetic-octomap-msgs       
+
+RUN cd $SRC_FOLDER/catkin_ws && /bin/bash -c 'source /opt/ros/kinetic/setup.sh; catkin_make'
+
+RUN git clone https://github.com/ros-naoqi/pepper_virtual.git
+RUN cd $SRC_FOLDER/catkin_ws && /bin/bash -c 'source /opt/ros/kinetic/setup.sh; catkin_make'
+
+# RUN apt-get update && apt-get install -y ros-kinetic-pepper-gazebo-plugin
+
+WORKDIR $SRC_FOLDER
+
+
+# if (CMAKE_VERSION VERSION_LESS "3.1")
+#     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+#       set (CMAKE_CXX_FLAGS "-std=gnu++11 ${CMAKE_CXX_FLAGS}")
+#     endif ()
+#   else ()
+#     set (CMAKE_CXX_STANDARD 11)
+#   endif ()

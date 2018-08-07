@@ -1,0 +1,8 @@
+#SAM
+ARG SAMHash=15b0cf59acfec6781dbb2d6c7f808bcb46a4c5de
+RUN git clone https://github.com/Sheffield-XPrize/SAM.git
+RUN cd SAM && git checkout -b localBranch $SAMHash
+
+ENV SAM_ROOT=$SRC_FOLDER
+ENV PYTHONPATH=$PYTHONPATH:$SAM_ROOT
+ENV PATH=$SAM_ROOT/SAM/SAM_Core:$PATH

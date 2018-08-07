@@ -1,19 +1,22 @@
 #Gazebo Yarp Plugins
-ARG gazeboPluginsHash=af8b684546c256f3a1f781b90d38d1054f6bb6ca
+# ARG gazeboPluginsHash=af8b684546c256f3a1f781b90d38d1054f6bb6ca
+ARG gazeboPluginsHash=cf437cfb36f28d02263769f6a22486ecf2ac0082
+#ARG gazeboPluginsHash=e45a7c561a4246344e4b6cd2f64fd149791911c8
 RUN git clone https://github.com/robotology/gazebo-yarp-plugins.git 			&& 	\
 	cd gazebo-yarp-plugins  && git checkout -b localBranch $gazeboPluginsHash 	&& 	\
 	mkdir build && cd build 													&& 	\
 	cmake ../ -DCMAKE_INSTALL_PREFIX=./install && make -j$cores install
 
-ENV GAZEBO_PLUGIN_PATH=$GAZEBO_PLUGIN_PATH:$SRC_FOLDER/gazebo-yarp-plugins/build/install/lib
-
 #Gazebo iCub
-ARG gazeboIcubHash=a68a038fef78a0883de1497a7b9832a2760850c9
-RUN git clone https://github.com/robotology/icub-gazebo.git && \
+ARG gazeboIcubHash=ab22fdc34c0a9faa6f72428c2abdb6afc3145872
+RUN GAZEBO_PLUGIN_PATH=$GAZEBO_PLUGIN_PATH:$SRC_FOLDER/gazebo-yarp-plugins/build/install/lib && \
+	git clone https://github.com/robotology/icub-gazebo.git && \
 	cd icub-gazebo && git checkout -b localBranch $gazeboIcubHash
 
-RUN echo "if [ -z "$GAZEBO_MODEL_PATH" ]; then \n\
-    export GAZEBO_MODEL_PATH=$SRC_FOLDER/icub-gazebo\n\
-else\n\
-    export GAZEBO_MODEL_PATH=${GAZEBO_MODEL_PATH}:$SRC_FOLDER/icub-gazebo\n\
-fi" >> /home/icub/.sourceScripts
+RUN echo 'export GAZEBO_PLUGIN_PATH=$GAZEBO_PLUGIN_PATH:$SRC_FOLDER/gazebo-yarp-plugins/build/install/lib' >> /home/icub/.sourceScripts && \
+    echo 'export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:$SRC_FOLDER/icub-gazebo' >> /home/icub/.sourceScripts && \
+    echo 'export GAZEBO_MODEL_PATH=$SRC_FOLDER/icub-gazebo:$GAZEBO_RESOURCE_PATH' >> /home/icub/.sourceScripts
+
+RUN cd $GZWEBPATH && /bin/bash -c 'source /usr/share/gazebo/setup.sh && \
+          export GAZEBO_MODEL_PATH=$SRC_FOLDER/icub-gazebo:$GAZEBO_MODEL_PATH && \
+          npm run deploy --- -m local'

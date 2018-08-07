@@ -8,12 +8,15 @@ RUN apt-get update && apt-get install -y \
 	ros-kinetic-ros-controllers 	\
 	ros-kinetic-xacro 				\
 	ros-kinetic-tf-conversions 		\
-	ros-kinetic-kdl-parser 			
+	ros-kinetic-kdl-parser
 
-RUN cd $SRC_FOLDER/catkin_ws/src && \
-	wstool merge https://raw.githubusercontent.com/vicariousinc/baxter_simulator/${ROS_DISTRO}-gazebo7/baxter_simulator.rosinstall 	&& 	\
-	wstool update 																													&& 	\
-	mv /bin/sh /bin/sh.old && ln -s /bin/bash /bin/sh 																				
+RUN pip install netifaces	
 
-RUN cd $SRC_FOLDER/catkin_ws && source /opt/ros/kinetic/setup.sh && catkin_make 													&& 	\
-	rm /bin/sh && mv /bin/sh.old /bin/sh
+
+RUN cd $SRC_FOLDER/catkin_ws/src 	&& \
+	wstool init .				 	&& \
+	wstool merge https://raw.githubusercontent.com/RethinkRobotics/baxter_simulator/kinetic-devel/baxter_simulator.rosinstall && \
+	wstool update																	
+
+RUN cd $SRC_FOLDER/catkin_ws && /bin/bash -c 'source /opt/ros/kinetic/setup.sh; catkin_make'
+RUN cp $SRC_FOLDER/catkin_ws/src/baxter/baxter.sh $SRC_FOLDER/catkin_ws

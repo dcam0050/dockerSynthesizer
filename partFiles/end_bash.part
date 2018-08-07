@@ -4,7 +4,11 @@ COPY Xylo.wav  .
 COPY startup.sh .
 COPY init.sh .
 COPY myprompt /usr/bin/
-RUN chmod +x startup.sh && chmod +x init.sh && rm -rf /var/lib/apt/lists/*
+RUN chmod +x startup.sh && chmod +x init.sh && chmod +x /usr/bin/myprompt && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p .config/terminator
+COPY config .config/terminator/
+
 RUN chown -R icub /home/icub && chown -R icub $SRC_FOLDER
 
 COPY bashrc_iCub /home/icub/.bashrc_iCub

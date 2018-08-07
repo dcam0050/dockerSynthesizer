@@ -12,6 +12,7 @@ ARG ovr5=ovr_sdk_linux_0.5.0.1
 #Setup Oculus Drivers
 COPY $ovr4.tar.xz  ./ovr4tar
 COPY $ovr5.tar.xz ./ovr5tar
+
 RUN tar -xvf ovr4tar && tar -xvf ovr5tar && mv $ovr5 ovr5 && mv $ovr4 ovr4 && rm ovr4tar ovr5tar 	&& 	\
 	cd $SRC_FOLDER/ovr5 && ./ConfigureDebian.sh 													&& 	\
 	make -j$cores debug && make -j$cores release 													&& 	\
@@ -29,7 +30,10 @@ ENV OCULUS_INCLUDE_DIR=$OCULUS_DIR/Include:OCULUS_ROOT=$OCULUS_DIR/Src
 ENV PATH=$OCULUS_SERVER:$OCULUS_INCLUDE_DIR:$OCULUS_DIR:$OCULUS_ROOT:$PATH
 ENV LD_LIBRARY_PATH=$OCULUS_LIB:$LD_LIBRARY_PATH
 
-RUN cp $OCULUS_LIB/libovr.a /usr/local/lib &&	\
+ADD start_oculus.sh $OCULUS_SERVER/start_oculus.sh
+
+RUN chmod +x $OCULUS_SERVER/start_oculus.sh &&  \
+	cp $OCULUS_LIB/libovr.a /usr/local/lib  &&	\
 	cp $ICUB_ROOT/build/lib/libicubmod.a $ICUB_LIB && \
 	ln -s $YARP_LIB/yarp/yarp_serial.so $YARP_LIB/yarp/libyarp_serial.so && \
 	mkdir -p /home/icub/.config

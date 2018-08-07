@@ -9,8 +9,8 @@ HOST=$(shell hostname)
 build: clean docker build_image buildBashrc build_image1
 
 run:
-	nvidia-docker start $(containerName)
-	nvidia-docker attach $(containerName)
+	docker start $(containerName)
+	docker attach $(containerName)
 
 clean:
 	@rm -f bashrc_iCub
@@ -26,7 +26,7 @@ configure:
 
 
 first_run:
-	nvidia-docker run -dit --env="DISPLAY="${DISPLAY} --env="QT_X11_NO_MITSHM=1" 					\
+	docker run -dit --env="DISPLAY="${DISPLAY} --env="QT_X11_NO_MITSHM=1" 					\
 					  --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" 									\
 					  --volume=/dev/snd:/dev/snd													\
 					  --volume="/home/$(USER)/.local/share/yarp:/home/icub/.local/share/yarp:rw" 	\
@@ -36,18 +36,18 @@ first_run:
 					  --network=host																\
 					  --privileged 																	\
 					  $(tagName)
-	nvidia-docker stop $(containerName)
+	docker stop $(containerName)
 	#set up display
 	@xhost +local:`docker inspect --format='{{ .Config.Hostname }}' $(containerName)`
-	nvidia-docker start $(containerName)
-	nvidia-docker attach $(containerName)
+	docker start $(containerName)
+	docker attach $(containerName)
 
 build_image build_image1:
-	nvidia-docker build -t $(tagName) .
+	docker build -t $(tagName) .
 	-@docker stop $(containerName) >/dev/null || true
 	-@docker rm $(containerName) >/dev/null || true
 
-	nvidia-docker run -dit --env="DISPLAY="${DISPLAY} --env="QT_X11_NO_MITSHM=1" 					\
+	docker run -dit --env="DISPLAY="${DISPLAY} --env="QT_X11_NO_MITSHM=1" 					\
 					  --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" 									\
 					  --volume=/dev/snd:/dev/snd													\
 					  --volume="/home/$(USER)/.local/share/yarp:/home/icub/.local/share/yarp:rw" 	\
@@ -57,7 +57,7 @@ build_image build_image1:
 					  --network=host																\
 					  --privileged 																	\
 					  $(tagName)
-	nvidia-docker stop $(containerName)
+	docker stop $(containerName)
 	#set up display
 	@xhost +local:`docker inspect --format='{{ .Config.Hostname }}' $(containerName)`
 

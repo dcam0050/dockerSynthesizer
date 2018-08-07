@@ -1,0 +1,13 @@
+git clone https://github.com/mozilla/tensorflow.git && \
+cd tensorflow && \
+git checkout -b warpctc origin/v1.0.0-warpctc
+
+sudo apt-get update && sudo apt-get install -y openjdk-8-jdk
+
+echo "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
+curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
+
+sudo apt-get update && sudo apt-get install -y bazel
+sudo apt-get upgrade -y bazel
+
+sudo apt-get install -y python-numpy python-dev python-pip python-wheel libcupti-dev 

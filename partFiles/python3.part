@@ -1,0 +1,12 @@
+#Python
+RUN cd $SRC_FOLDER && wget https://repo.continuum.io/archive/Anaconda3-5.0.0.1-Linux-x86_64.sh && \
+	cd $SRC_FOLDER && bash Anaconda3-5.0.0.1-Linux-x86_64.sh -b -p ./anaconda3 	&& 	\
+	rm $SRC_FOLDER/anaconda3/lib/libgomp.so* 									&& 	\
+	rm $SRC_FOLDER/anaconda3/lib/libstdc++.so* 									&& 	\
+	rm $SRC_FOLDER/anaconda3/lib/libgfortran.so* 								&& 	\
+	rm $SRC_FOLDER/anaconda3/lib/libQt5*										&& 	\
+	rm -r $SRC_FOLDER/anaconda3/lib/cmake/Qt5* 									&& 	\
+	rm $SRC_FOLDER/Anaconda3-5.0.0.1-Linux-x86_64.sh
+
+ENV PYTHONPATH=$SRC_FOLDER/anaconda3/bin 
+ENV PATH=$PYTHONPATH:$PATH

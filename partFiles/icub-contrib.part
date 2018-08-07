@@ -1,0 +1,15 @@
+# ICUB CONTRIB
+ARG contribHash=d870318b5b27bbe9f2e4395c8ca80347d6bfbda5
+RUN git clone https://github.com/robotology/icub-contrib-common.git && \
+        cd icub-contrib-common  && git checkout -b localBranch $contribHash && \
+	mkdir build && cd build && \
+	cmake .. -DCMAKE_INSTALL_PREFIX=$SRC_FOLDER/icub-contrib-common/build/install 				\
+		 -DCMAKE_BUILD_TYPE=Release							&&	\
+	make && make install
+
+ENV ICUBCONTRIB_ROOT=$SRC_FOLDER/icub-contrib-common 
+ENV ICUBCONTRIB_DIR=$ICUBCONTRIB_ROOT/build/install
+ENV ICUBCONTRIB_BIN=$ICUBCONTRIB_DIR/bin \
+	CMAKE_PREFIX_PATH=$ICUBCONTRIB_DIR
+ENV PATH=$ICUBCONTRIB_DIR:$ICUBCONTRIB_BIN:$PATH
+ENV YARP_DATA_DIRS=$YARP_DATA_DIRS:$ICUB_DIR/share/iCub:$ICUBCONTRIB_DIR/share/ICUBcontrib:$ICUB_ROOT/app/simConfig/conf

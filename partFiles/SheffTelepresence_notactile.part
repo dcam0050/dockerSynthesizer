@@ -8,18 +8,6 @@ RUN cd $SRC_FOLDER/SheffTelepresence/telepresence_vision 			&& \
 	mkdir build &&  cd build &&	cmake .. -DCMAKE_INSTALL_PREFIX=$SRC_FOLDER/telepresenceInstall -DCMAKE_BUILD_TYPE=Release && \
 	make -j$cores && make -j$cores install
 
-# Arduino Tactile
-RUN cd $SRC_FOLDER/SheffTelepresence/telepresence_tactile/arduino_tactile_library 											&& \
-	mkdir build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=$SRC_FOLDER/telepresenceInstall -DCMAKE_BUILD_TYPE=Release 	&& \
-	make -j$cores && make -j$cores install
-ENV ARDUINO_TACTILE_ROOT=$SRC_FOLDER/SheffTelepresence/telepresence_tactile/arduino_tactile_library
-
-#Telepresence Tactile
-ENV PATH=$YARP_LIB/yarp:$PATH
-RUN cd $SRC_FOLDER/SheffTelepresence/telepresence_tactile 			&& \
-	mkdir build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=$SRC_FOLDER/telepresenceInstall -DCMAKE_BUILD_TYPE=Release && \
-	make -j$cores && make -j$cores install
-
 #Telepresence Neck
 RUN cd $SRC_FOLDER/SheffTelepresence/telepresence_neck 				&& \
 	mkdir build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=$SRC_FOLDER/telepresenceInstall -DCMAKE_BUILD_TYPE=Release && \

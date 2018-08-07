@@ -1,0 +1,25 @@
+# GAZEBO 7
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys D2486D2DD83DB69272AFE98867170598AF249743
+
+RUN . /etc/os-release \
+    && . /etc/lsb-release \
+    && echo "deb http://packages.osrfoundation.org/gazebo/$ID-stable $DISTRIB_CODENAME main" > /etc/apt/sources.list.d/gazebo-latest.list
+
+RUN apt-get update && apt-get install -q -y \
+    gazebo7 \
+    libgazebo7-dev \
+    && rm -rf /var/lib/apt/lists/*
+    
+RUN echo 'source /usr/share/gazebo/setup.sh' >> /home/icub/.sourceScripts 
+
+# GazeboWeb
+RUN curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+RUN apt-get update && \
+  apt-get install -y libjansson-dev nodejs libboost-dev imagemagick libtinyxml-dev mercurial cmake build-essential
+
+ENV GZWEBPATH=$SRC_FOLDER/gzweb
+RUN hg clone https://bitbucket.org/osrf/gzweb && \
+	cd gzweb && hg up gzweb_1.4.0 && \
+	/bin/bash -c 'source /usr/share/gazebo/setup.sh && \
+          export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH && \
+          npm run deploy --- -m'

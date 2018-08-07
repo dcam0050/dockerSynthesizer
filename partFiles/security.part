@@ -1,0 +1,10 @@
+ADD google-chrome-stable_current_amd64.deb google.deb
+RUN apt-get update
+RUN dpkg -i google.deb || apt-get -f install -y
+
+
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-key FDC247B7
+RUN echo 'deb https://repo.windscribe.com/ubuntu xenial main' | sudo tee /etc/apt/sources.list.d/windscribe-repo.list
+#RUN rm /etc/apt/sources.list.d/icub
+#RUN apt-get update
+#RUN apt-get install windscribe-cli

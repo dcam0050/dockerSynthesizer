@@ -1,0 +1,60 @@
+# ROS indigo
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    dirmngr \
+    gnupg2 \
+    && rm -rf /var/lib/apt/lists/*
+
+# setup keys
+RUN apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116
+
+# setup sources.list
+RUN echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list
+
+# install bootstrap tools
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    python-rosdep \
+    python-rosinstall \
+    python-vcstools \
+    && rm -rf /var/lib/apt/lists/*
+
+# setup environment
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
+
+# bootstrap rosdep
+RUN rosdep init \
+    && rosdep update
+
+# install ros packages
+ENV ROS_DISTRO indigo
+RUN apt-get update && apt-get install -y \
+    ros-indigo-ros-core=1.1.5-0* \
+    && rm -rf /var/lib/apt/lists/*
+
+# # GAZEBO
+# RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys D2486D2DD83DB69272AFE98867170598AF249743
+
+# RUN . /etc/os-release \
+#     && . /etc/lsb-release \
+#     && echo "deb http://packages.osrfoundation.org/gazebo/$ID-stable $DISTRIB_CODENAME main" > /etc/apt/sources.list.d/gazebo-latest.list
+
+# RUN apt-get update && apt-get install -q -y \
+#     gazebo7 \
+#     libgazebo7-dev \
+#     && rm -rf /var/lib/apt/lists/*
+
+EXPOSE 11345
+
+# setup catkin workspace
+RUN apt-get update && apt-get install -y ros-indigo-catkin && pip install catkin_pkg  
+
+RUN echo "source /opt/ros/indigo/setup.sh" >> /home/icub/.sourceScripts                 &&  \
+    echo "source $SRC_FOLDER/catkin_ws/devel/setup.bash" >> /home/icub/.sourceScripts   &&  \
+    chmod +x /opt/ros/indigo/setup.sh                                                   &&  \
+    mkdir -p $SRC_FOLDER/catkin_ws/src                                                  &&  \
+    cd $SRC_FOLDER/catkin_ws                                                            &&  \
+    /bin/bash -c 'source /opt/ros/indigo/setup.sh; catkin_make'
+
+COPY ./ros_entrypoint.sh /home/icub/
+
+RUN chmod +x /home/icub/ros_entrypoint.sh

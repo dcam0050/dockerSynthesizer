@@ -1,13 +1,11 @@
 #Install dlib
-RUN apt-get update && apt-get install libsqlite3-dev
-
 RUN wget http://dlib.net/files/dlib-19.2.tar.bz2 && tar xvfj dlib-19.2.tar.bz2 && \
 	cd dlib-19.2/examples && mkdir build && cd build && \
 	cmake .. -DOpenCV_DIR=$SRC_FOLDER/opencv3/build/install/share/OpenCV && make -j$cores && rm $SRC_FOLDER/dlib-19.2.tar.bz2
 
 #Human Sensing SAM
-RUN git clone https://github.com/dcam0050/human-sensing-SAM.git 				&& 	\
- 	cd human-sensing-SAM && mkdir build && cd build 							&& 	\
+ADD human-sensing-SAM human-sensing-SAM
+RUN cd human-sensing-SAM && mkdir build && cd build 							&& 	\
 	cmake .. -DCMAKE_BUILD_TYPE=Release												\
 			-DOpenCV_DIR=/usr/local/src/robot/opencv/build/install/share/OpenCV && 	\
 	make -j6 && make install

@@ -1,0 +1,20 @@
+#COPY pepper_indigo_sim_install.sh /home/icub
+#RUN echo "source ~/pepper_ws/devel/setup.bash" >> /home/icub/.sourceScripts
+#RUN pip install rospkg                             
+
+ARG version=2.5.5.5-linux64
+ARG naoqic=naoqi-sdk-$version
+ARG naoqipy=pynaoqi-python2.7-$version
+
+COPY $naoqic.tar.gz ./$naoqic.tar.gz
+COPY $naoqipy.tar.gz ./$naoqipy.tar.gz
+
+RUN tar xvzf $naoqic.tar.gz && tar xvzf $naoqipy.tar.gz && \
+    rm $naoqic.tar.gz && rm $naoqipy.tar.gz 			&& \
+    mv $naoqic naoqi-sdk && mv $naoqipy pynaoqi 		&& \
+    pip install netifaces pydub
+
+ENV PYTHONPATH=$PYTHONPATH:$SRC_FOLDER/pynaoqi/lib/python2.7/site-packages
+
+WORKDIR $SRC_FOLDER
+

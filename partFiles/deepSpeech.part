@@ -1,0 +1,68 @@
+ARG GIT_LFS_VER=2.1.1
+ARG SNOWBOY=snowboy_14.04_binaries.tar.bz2
+
+## Install git-lfs
+RUN curl -L https://github.com/git-lfs/git-lfs/releases/download/v$GIT_LFS_VER/git-lfs-linux-amd64-$GIT_LFS_VER.tar.gz       \
+   | tar xvzf -                               \
+   && git-lfs-$GIT_LFS_VER/install.sh         \
+   && rm -rf git-lfs-$GIT_LFS_VER
+
+
+## Install all the python packages
+RUN pip install --upgrade pip               &&  \
+    apt-get update                          &&  \
+    apt-get install -y portaudio19-dev sox  &&  \
+    apt-get install -y pavucontrol parallel &&  \
+    apt-get clean                           &&  \
+    rm -rf /var/lib/apt/lists/*             &&  \
+    conda update dask                       
+
+RUN pip install --upgrade                       \
+      pandas                                    \
+      progressbar2                              \
+      numpy                                     \
+      scipy==0.19.1                             \
+      paramiko>=2.1                             \
+      sox                                       \
+      pysftp                                    \                             
+      python_speech_features                    \
+      pyxdg                                     \
+      bs4                                       \
+      pyaudio                                   \
+      simplejson                                \
+      python-utils                              \
+      && conda install setuptools tensorflow              
+    
+RUN mkdir Deep_Speech 
+WORKDIR $SRC_FOLDER/Deep_Speech
+
+# Hotword Detector
+RUN mkdir hotword_detection
+WORKDIR $SRC_FOLDER/Deep_Speech/hotword_detection
+COPY $SNOWBOY .
+COPY Hello_iCub.pmdl .
+RUN mkdir snowboy && tar -xvf $SNOWBOY -C snowboy --strip-components=1 && rm $SNOWBOY
+
+# # Auditok
+WORKDIR $SRC_FOLDER/Deep_Speech
+COPY auditok $SRC_FOLDER/Deep_Speech/auditok
+RUN apt-get install libav-tools libavcodec-extra
+# Deep Speech
+# RUN wget https://github.com/mozilla/DeepSpeech/releases/download/v0.1.0/deepspeech-0.1.0-models.tar.gz
+# RUN tar -xzvf deepspeech-0.1.0-models.tar.gz && \
+#     rm deepspeech-0.1.0-models.tar.gz && \
+#     mv models DeepSpeech
+
+Run pip install SpeechRecognition google-api-python-client
+
+RUN pip install rasa_nlu spacy rasa_core && \
+    python -m spacy download en && \
+    conda install scikit-learn  && \
+    pip install sklearn-crfsuite                 
+
+RUN echo 'export SPEECH_DIR=$SRC_FOLDER/Deep_Speech'                                                >> /home/icub/.sourceScripts && \                  
+    echo 'export HOTWORD_MODEL=$SPEECH_DIR/hotword_detection/Hello_iCub.pmdl'                       >> /home/icub/.sourceScripts && \
+    echo 'export PYTHONPATH=$SPEECH_DIR/hotword_detection/snowboy:$SPEECH_DIR/auditok:$PYTHONPATH'  >> /home/icub/.sourceScripts && \
+    echo 'export DEEPSPEECH_DIR=$SPEECH_DIR/DeepSpeech'                                             >> /home/icub/.sourceScripts
+    # echo 'export PATH=/home/icub/user_files/Sheffield-XPrize/SAM/SAM_Core:$PATH'                    >> /home/icub/.sourceScripts
+WORKDIR $SRC_FOLDER

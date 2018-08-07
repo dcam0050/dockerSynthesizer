@@ -1,10 +1,10 @@
-# YARP TELEPRESENCE
+# YARP
 RUN apt-get update && apt-get install -y \
 	swig3.0				\
 	liblua5.2-dev		\
-	python-tk		
+	python-tk
 
-ARG yarpHash=9bef32d936b6e787cc6515323b4850088cd372da
+ARG yarpHash=39e5550dec20426932c7f50165d7b8522c7ceaff
 RUN	git clone https://github.com/robotology/yarp.git && cd yarp && git checkout -b localBranch $yarpHash
 
 ADD yarp.i yarp/bindings
@@ -51,9 +51,8 @@ ENV YARP_DIR=$YARP_ROOT/build/install
 ENV YARP_LIB=$YARP_DIR/lib \
 	YARP_BIN=$YARP_DIR/bin \
 	YARP_ROBOT_NAME=iCubSheffield01
-ENV PATH=$YARP_BIN:$YARP_LIB:$LUA_CPATH:$PATH \
+ENV PATH=$YARP_BIN:$LUA_CPATH:$PATH \
 	LD_LIBRARY_PATH=$YARP_LIB:$LD_LIBRARY_PATH
-
 ENV YARP_PYTHON=$YARP_DIR/lib/python2.7/site-packages
 ENV PYTHONPATH=$PYTHONPATH:$YARP_PYTHON
 

@@ -1,0 +1,18 @@
+RUN pip install --upgrade pip && pip install paramz==0.7.4 && conda install ipyparallel -y && conda install 'pyqt<5' -y
+
+#Git clone GPY and WYSIWYD
+ARG GPYHash=845168af3bb5e61dafed4dd860644546e9c4666a
+RUN git clone https://github.com/SheffieldML/GPy.git && \
+	cd GPy && git checkout -b localBranch $GPYHash && python setup.py build_ext --inplace 
+ENV GPY_ROOT=$SRC_FOLDER/GPy \
+	GPY_DIR=$SRC_FOLDER/GPy/build
+
+ENV PYTHONPATH=$PYTHONPATH:$YARP_PYTHONLIB:$OPENCV_PYTHONLIB:$GPY_DIR:$GPY_ROOT:
+
+ARG GPYOPTHash=dd1438023e9d133af0c861a9a3c3fd24a5fa07bd
+RUN git clone https://github.com/SheffieldML/GPyOpt.git && \
+	cd GPyOpt && git checkout -b localBranch $GPYOPTHash && python setup.py develop
+ENV GPY_ROOT=$SRC_FOLDER/GPyOpt \
+	GPY_DIR=$SRC_FOLDER/GPyOpt/build
+
+ENV PYTHONPATH=$PYTHONPATH:$GPYOPT_DIR:$GPYOPT_ROOT

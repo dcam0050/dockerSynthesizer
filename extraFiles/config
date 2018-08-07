@@ -1,0 +1,119 @@
+[global_config]
+  suppress_multiple_term_dialog = True
+[keybindings]
+[layouts]
+  [[default]]
+    [[[child1]]]
+      parent = window0
+      type = Terminal
+    [[[window0]]]
+      parent = ""
+      type = Window
+  [[demo]]
+    [[[child0]]]
+      fullscreen = False
+      last_active_window = True
+      maximised = False
+      order = 0
+      parent = ""
+      position = 138:42
+      size = 1378, 753
+      title = icub@daniel-beast: ~
+      type = Window
+    [[[child1]]]
+      active_page = 0
+      labels = None, icub@daniel-beast: ~
+      last_active_term = c00efda7-7bc4-4fa5-9ac1-6e600b418ae9, 66453692-67d4-4139-a107-217e47368cb5
+      order = 0
+      parent = child0
+      type = Notebook
+    [[[child11]]]
+      order = 1
+      parent = child7
+      position = 180
+      ratio = 0.504143646409
+      type = VPaned
+    [[[child3]]]
+      order = 1
+      parent = child1
+      position = 686
+      ratio = 0.499637155298
+      type = HPaned
+    [[[child4]]]
+      order = 0
+      parent = child3
+      position = 358
+      ratio = 0.49724137931
+      type = VPaned
+    [[[child7]]]
+      order = 1
+      parent = child3
+      position = 358
+      ratio = 0.49724137931
+      type = VPaned
+    [[[child8]]]
+      order = 0
+      parent = child7
+      position = 174
+      ratio = 0.493016759777
+      type = VPaned
+    [[[terminal10]]]
+      command = 'myprompt daniel-beast "yarp rpc /iol2opc/rpc remove_all"'
+      order = 1
+      parent = child8
+      profile = default
+      type = Terminal
+      uuid = 20925a83-c04a-4495-9ed2-82bcb37ff99f
+    [[[terminal12]]]
+      command = 'myprompt daniel-beast "rm -r *"'
+      directory = /home/icub/.local/share/yarp/contexts/himrep/IOL2OPCDatabase
+      order = 0
+      parent = child11
+      profile = default
+      type = Terminal
+      uuid = 47266e34-dbde-4b13-808f-b68c3d009696
+    [[[terminal13]]]
+      command = 'myprompt daniel-beast "watch -n 3 ls"'
+      directory = /home/icub/.local/share/yarp/contexts/himrep/IOL2OPCDatabase
+      order = 1
+      parent = child11
+      profile = default
+      type = Terminal
+      uuid = 6fdbfc11-52db-49a9-b72e-f25aba3f3ebe
+    [[[terminal2]]]
+      command = myprompt pc104 yarprobotinterface
+      order = 0
+      parent = child1
+      profile = default
+      type = Terminal
+      uuid = c00efda7-7bc4-4fa5-9ac1-6e600b418ae9
+    [[[terminal5]]]
+      command = 'myprompt daniel-beast "allostatic_plot.py"'
+      order = 0
+      parent = child4
+      profile = default
+      type = Terminal
+      uuid = 66453692-67d4-4139-a107-217e47368cb5
+    [[[terminal6]]]
+      command = 'myprompt daniel-beast "linearClassifierModule --BufferSize 1 --CSVM 1.0 --databaseFolder IOL2OPCDatabase --WeightedSVM 1"'
+      order = 1
+      parent = child4
+      profile = default
+      type = Terminal
+      uuid = 5b824b81-e285-4151-95e2-3186dc9bc293
+    [[[terminal9]]]
+      command = 'myprompt daniel-beast "yarp rpc /actionsRenderingEngine/cmd:io home all"'
+      directory = ""
+      order = 0
+      parent = child8
+      profile = default
+      type = Terminal
+      uuid = 67fb4840-c68b-4672-85cc-f85d7942f1f0
+[plugins]
+[profiles]
+  [[default]]
+    background_image = None
+    exit_action = hold
+    font = Monospace 14
+    scrollback_infinite = True
+    use_system_font = False

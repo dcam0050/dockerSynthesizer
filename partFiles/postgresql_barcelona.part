@@ -1,4 +1,4 @@
-ARG DATAFILE=ABM_backup.backup
+ARG DATAFILE=ABM_backup_barcelona.backup
 
 RUN apt-get update && apt-get install -y		\
 	bison 				\
@@ -30,7 +30,7 @@ USER postgres
 RUN /etc/init.d/postgresql start &&\
     psql --command "alter user postgres with password 'postgres'" && \
     echo "postgres" | createdb -h localhost -p 5432 -U postgres ABM && \
-    echo "postgres" | /usr/bin/pg_restore 	--host localhost --port 5432 --username "postgres" \
-											--dbname "ABM" --section pre-data --section data \
-											--section post-data --verbose "/usr/local/src/robot/$DATAFILE"
+	psql -q -U postgres ABM < /usr/local/src/robot/$DATAFILE
+
+# /usr/bin/pg_restore --host localhost --port 5432 --username "postgres" --dbname "ABM" --section pre-data --section data --section post-data --verbose "/usr/local/src/robot/ABM_backup_barcelona.backup"
 USER root

@@ -1,0 +1,24 @@
+# Blockly
+RUN apt-get update && \
+	apt-get install -y ros-kinetic-mavros ros-kinetic-mavros-extras python3-pip && \
+	pip install --upgrade pip && \
+	pip3 install autobahn rospkg catkin_pkg empy numpy && \
+	mkdir -p ./blockly_ws/src
+
+RUN cd $SRC_FOLDER/blockly_ws/src && \
+	git clone --recurse-submodules https://github.com/MIRO-Robot/robot_blockly.git && \
+	cd $SRC_FOLDER/blockly_ws && \
+	/bin/bash -c 'source /opt/ros/kinetic/setup.sh; catkin_make_isolated -j2 --pkg robot_blockly --install'
+
+# Nginx to serve website
+RUN \
+  add-apt-repository -y ppa:nginx/stable && \
+  apt-get update && \
+  apt-get install -y nginx && \
+  rm -rf /var/lib/apt/lists/* && \
+  echo "\ndaemon off;" >> /etc/nginx/nginx.conf
+
+# EXPOSE 80 443 8080 1036 9000
+
+# static html content
+COPY miro_sim_html /var/www/html

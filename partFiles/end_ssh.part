@@ -3,18 +3,26 @@ WORKDIR /home/icub/
 COPY Xylo.wav  .
 COPY startup.sh .
 COPY init.sh .
+COPY detect_attY.sh .
+COPY mirosim.sh .
 COPY myprompt /usr/bin/
-RUN chmod +x startup.sh && chmod +x init.sh && rm -rf /var/lib/apt/lists/*
+COPY setpermissions.sh .
+RUN chmod +x setpermissions.sh && mkdir .local && chown -R icub /home/icub/.local && chown icub /home/icub/.* && chown icub /home/icub/
+RUN mkdir user_files 
+
+RUN apt-get update && apt-get install -y parallel
+
+RUN mkdir -p .config/terminator
+COPY config .config/terminator/
 
 USER icub
 RUN ssh-keygen -t rsa -f /home/icub/.ssh/id_rsa -q -N "" && touch .ssh/authorized_keys && \
 	cat .ssh/id_rsa.pub >> .ssh/authorized_keys
 
 USER root
-RUN chown -R icub /home/icub && chown -R icub $SRC_FOLDER
 
 COPY bashrc_iCub /home/icub/.bashrc_iCub
-RUN chown -R icub /home/icub/.bashrc_iCub
+COPY asoundrc /home/icub/.asoundrc
 
 USER icub
 ENTRYPOINT bash

@@ -1,4 +1,4 @@
-FROM nvidia/cuda:8.0-cudnn5-devel-ubuntu16.04
+FROM nvidia/cuda:8.0-cudnn5-devel-ubuntu14.04
 
 ARG cores=6
 # ARG VIDEO_GID
@@ -6,11 +6,11 @@ ENV SRC_FOLDER=/usr/local/src/robot
 
 # If host is running squid-deb-proxy on port 8000, populate /etc/apt/apt.conf.d/30proxy
 # By default, squid-deb-proxy 403s unknown sources, so apt shouldn't proxy ppa.launchpad.net
-RUN route -n | awk '/^0.0.0.0/ {print $2}' > /tmp/host_ip.txt
-RUN echo "HEAD /" | nc `cat /tmp/host_ip.txt` 8000 | grep squid-deb-proxy \
-  && (echo "Acquire::http::Proxy \"http://$(cat /tmp/host_ip.txt):8000\";" > /etc/apt/apt.conf.d/30proxy) \
-  && (echo "Acquire::http::Proxy::ppa.launchpad.net DIRECT;" >> /etc/apt/apt.conf.d/30proxy) \
-  || echo "No squid-deb-proxy detected on docker host"
+# RUN route -n | awk '/^0.0.0.0/ {print $2}' > /tmp/host_ip.txt
+# RUN echo "HEAD /" | nc `cat /tmp/host_ip.txt` 8000 | grep squid-deb-proxy \
+#   && (echo "Acquire::http::Proxy \"http://$(cat /tmp/host_ip.txt):8000\";" > /etc/apt/apt.conf.d/30proxy) \
+#   && (echo "Acquire::http::Proxy::ppa.launchpad.net DIRECT;" >> /etc/apt/apt.conf.d/30proxy) \
+#   || echo "No squid-deb-proxy detected on docker host"
 
 #create icub user
 RUN apt-get update && \
@@ -41,7 +41,6 @@ RUN apt-get update && apt-get install -y --allow-unauthenticated	\
 	iputils-ping 							\
 	openssh-server							\
 	expect 									\
-	icub-common								\
 	doxygen									\
 	pciutils								\
 	libasound2 								\
@@ -52,6 +51,6 @@ RUN apt-get update && apt-get install -y --allow-unauthenticated	\
 	tmux                                    \
     terminator             					\
     && apt-get clean 						\
-   	&& rm -rf /var/lib/apt/lists/*                   
+   	&& rm -rf /var/lib/apt/lists/*                                            
 
 WORKDIR $SRC_FOLDER

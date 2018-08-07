@@ -1,0 +1,160 @@
+ARG version=2.5.5.5-linux64
+ARG naoqic=naoqi-sdk-$version
+ARG naoqipy=pynaoqi-python2.7-$version
+
+COPY $naoqic.tar.gz ./$naoqic.tar.gz
+COPY $naoqipy.tar.gz ./$naoqipy.tar.gz
+
+RUN tar xzf $naoqic.tar.gz && tar xzf $naoqipy.tar.gz && \
+    rm $naoqic.tar.gz && rm $naoqipy.tar.gz 			&& \
+    mv $naoqic naoqi-sdk && mv $naoqipy pynaoqi 		&& \
+    pip install netifaces
+
+ENV PYTHONPATH=$PYTHONPATH:$SRC_FOLDER/pynaoqi/lib/python2.7/site-packages
+
+RUN pip install --upgrade pip               &&  \
+    apt-get update                          &&  \
+    apt-get install -y portaudio19-dev sox  &&  \
+    apt-get install -y pavucontrol parallel &&  \
+    apt-get clean                           &&  \
+    rm -rf /var/lib/apt/lists/*                       
+
+RUN pip install --upgrade                       \
+      pandas                                    \
+      progressbar2                              \
+      numpy                                     \
+      scipy==0.19.1                             \
+      paramiko>=2.1                             \
+      sox                                       \
+      pysftp                                    \                             
+      python_speech_features                    \
+      pyxdg                                     \
+      bs4                                       \
+      pyaudio                                   \
+      simplejson                                \
+      python-utils                              \
+      ikpy                                      \
+      && conda install setuptools    
+
+RUN apt-get update                          &&  \
+    apt-get install -y libgirepository1.0-dev
+
+RUN apt-get update
+RUN conda update pycairo
+
+RUN pip install pygobject 
+RUN conda install fontconfig=2.11 
+RUN rm /usr/local/src/robot/anaconda2/bin/gst-*
+
+RUN apt-get update                          &&  \
+    apt-get install -y gstreamer1.0         &&  \
+    apt-get remove -y gstreamer1.0-vaapi gstreamer1.0-clutter
+
+ENV GST_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/gstreamer-1.0/:/usr/local/lib/gstreamer-1.0
+
+#Pinocchio installation
+# RUN apt-get update && \
+#     apt-get install -y pax liburdfdom-dev assimp-utils libassimp-dev texlive libssl-dev
+
+# RUN git clone https://git.openrobots.org/robots/robotpkg.git
+# RUN cd robotpkg && git clone https://git.openrobots.org/robots/robotpkg/robotpkg-wip.git wip
+
+# RUN cd robotpkg/bootstrap && ./bootstrap
+
+# ENV PATH=/opt/openrobots/bin:$PATH
+# ENV PKG_CONFIG_PATH=/opt/openrobots/lib/pkgconfig:$PKG_CONFIG_PATH
+# ENV LD_LIBRARY_PATH=/opt/openrobots/lib:$LD_LIBRARY_PATH
+# ENV PYTHONPATH=/opt/openrobots/lib/python2.7/site-packages:$PYTHONPATH
+
+# RUN cd robotpkg/wip/pinocchio && sudo make update
+
+# OpenRave Installation
+RUN conda install h5py numpy scipy sympy=0.7.1
+
+RUN apt-get update && \
+    apt-get install -y cmake  \
+                       g++ \
+                       git \
+                       minizip \ 
+                       # qt4-dev-tools \
+                       libassimp-dev \
+                       libavcodec-dev \
+                       libavformat-dev \
+                       libavformat-dev \
+                       libboost-all-dev \
+                       libboost-date-time-dev \ 
+                       libbullet-dev \
+                       libfaac-dev \
+                       libglew-dev \
+                       libgsm1-dev \
+                       liblapack-dev \
+                       liblog4cxx-dev \
+                       libmpfr-dev \
+                       libode-dev \
+                       libogg-dev
+                       
+ RUN apt-get update && \
+    apt-get install -y libpcrecpp0v5 \
+                       libpcre3-dev \
+                       libqhull-dev \
+                       # libqt4-dev \
+                       libsoqt-dev-common \
+                       libsoqt4-dev \
+                       libswscale-dev \ 
+                       libswscale-dev \
+                       libvorbis-dev \
+                       libx264-dev \
+                       libxml2-dev \
+                       libxvidcore-dev
+                       
+RUN apt-get update && \
+    apt-get install -y libccd-dev \
+                       libcairo2-dev \
+                       libjasper-dev \
+                       libpoppler-glib-dev \
+                       libsdl2-dev \
+                       libtiff5-dev \
+                       libxrandr-dev
+
+RUN git clone https://github.com/rdiankov/collada-dom.git && \
+    cd collada-dom && mkdir build && cd build && \
+    cmake .. && make -j4 && make install
+
+RUN git clone https://github.com/openscenegraph/OpenSceneGraph.git
+
+RUN cd OpenSceneGraph && git checkout -b local 018383dca1a2099717c75fcca9a5260c358a9210 && \
+    mkdir build && cd build && \
+    cmake .. -DDESIRED_QT_VERSION=5 && make -j4 && make install
+
+RUN git clone https://github.com/flexible-collision-library/fcl.git && \
+    cd fcl && git checkout 0.5.0 && mkdir build && cd build && cmake .. && \
+    make -j4 && make install
+
+# RUN ln -sf /usr/include/eigen3/Eigen /usr/include/Eigen
+
+RUN git clone --branch latest_stable https://github.com/rdiankov/openrave.git
+
+RUN cd openrave && mkdir build && cd build &&  \
+    cmake .. &&  \
+    make -w -j4 && make install
+
+RUN apt-get update && apt-get install -y ros-kinetic-srdfdom ros-kinetic-urdf
+
+RUN cd catkin_ws/src && git clone https://github.com/personalrobotics/or_urdf.git && \
+    cd or_urdf && git checkout origin/kinetic_fixes -b local
+
+RUN cd catkin_ws && /bin/bash -c 'source /opt/ros/kinetic/setup.sh; catkin_make'
+
+RUN echo 'LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(openrave-config --python-dir)/openravepy/_openravepy_' >> /home/icub/.sourceScripts 
+RUN echo 'PYTHONPATH=$PYTHONPATH:$(openrave-config --python-dir)' >> /home/icub/.sourceScripts
+
+# edit libintmath.py with the following
+# https://groups.google.com/forum/?fromgroups=#!topic/mpmath/3bVKcrBGYiU
+# if BACKEND == 'gmpy': 
+#    if gmpy.version() >= '2': 
+#        isqrt_small = isqrt_fast = isqrt = gmpy.isqrt 
+#        sqrtrem = gmpy.isqrt_rem 
+#    else: 
+#        isqrt_small = isqrt_fast = isqrt = gmpy.sqrt 
+#        sqrtrem = gmpy.sqrtrem 
+
