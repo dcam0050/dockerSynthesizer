@@ -5,21 +5,11 @@ RUN apt-get update && apt-get install -y      	\
     ros-kinetic-gazebo-ros-control              \       
     ros-kinetic-moveit
 
-ARG version=2.5.5.5-linux64
-ARG naoqic=naoqi-sdk-$version
-ARG naoqipy=pynaoqi-python2.7-$version
+COPY pynaoqi-python2.7-2.5.5.5-linux64.tar.gz ./pynaoqi-python2.7-2.5.5.5-linux64.tar.gz
 
-#COPY $naoqic.tar.gz ./$naoqic.tar.gz
-COPY $naoqipy.tar.gz ./$naoqipy.tar.gz
-
-#RUN tar xzf $naoqic.tar.gz && tar xzf $naoqipy.tar.gz   && \
-#   rm $naoqic.tar.gz && rm $naoqipy.tar.gz 			&& \
-#    mv $naoqic naoqi-sdk && mv $naoqipy pynaoqi && chown -R icub pynaoqi && \
-#    pip install netifaces
-
-RUN tar xzf $naoqipy.tar.gz   && \
-    rm $naoqipy.tar.gz 			&& \
-    mv $naoqipy pynaoqi && chown -R icub pynaoqi && \
+RUN tar xzf pynaoqi-python2.7-2.5.5.5-linux64.tar.gz   && \
+    rm pynaoqi-python2.7-2.5.5.5-linux64.tar.gz        && \
+    mv pynaoqi-python2.7-2.5.5.5-linux64 pynaoqi && chown -R icub:icub pynaoqi && \
     pip install netifaces
 
 ENV PYTHONPATH=$PYTHONPATH:$SRC_FOLDER/pynaoqi/lib/python2.7/site-packages
