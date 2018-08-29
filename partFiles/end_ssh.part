@@ -1,28 +1,28 @@
-WORKDIR /home/icub/
+WORKDIR /home/$USER/
+RUN chown -R icub:icub /home/$USER  && \
+	apt-get update 					&& \
+	apt-get install dbus-x11 		&& \
+	apt-get clean 					&& \
+   	rm -rf /var/lib/apt/lists/*
 
-COPY Xylo.wav  .
-COPY startup.sh .
-COPY init.sh .
-COPY detect_attY.sh .
-COPY mirosim.sh .
-COPY myprompt /usr/bin/
-COPY setpermissions.sh .
-RUN chmod +x setpermissions.sh && mkdir .local && chown -R icub /home/icub/.local && chown icub /home/icub/.* && chown icub /home/icub/
-RUN mkdir user_files 
+USER $USER
 
-RUN apt-get update && apt-get install -y parallel
+#COPY Xylo.wav  .
+#COPY startup.sh .
+#COPY init.sh .
+#COPY detect_attY.sh .
+#COPY mirosim.sh .
+#COPY myprompt /usr/bin/
+#COPY setpermissions.sh .
 
-RUN mkdir -p .config/terminator
+RUN mkdir -p .config/terminator && mkdir user_files && echo "" >> .sourceScripts
+
 COPY config .config/terminator/
 
-USER icub
-RUN ssh-keygen -t rsa -f /home/icub/.ssh/id_rsa -q -N "" && touch .ssh/authorized_keys && \
+RUN ssh-keygen -t rsa -f /home/$USER/.ssh/id_rsa -q -N "" && touch .ssh/authorized_keys && \
 	cat .ssh/id_rsa.pub >> .ssh/authorized_keys
 
-USER root
+COPY bashrc_iCub /home/$USER/.bashrc_iCub
+COPY asoundrc /home/$USER/.asoundrc
 
-COPY bashrc_iCub /home/icub/.bashrc_iCub
-COPY asoundrc /home/icub/.asoundrc
-
-USER icub
 ENTRYPOINT bash

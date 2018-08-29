@@ -1,0 +1,19 @@
+RUN apt-get update && \
+	apt-get install -y  \
+	wget  				\
+	libsctp1 			\
+	libwxgtk3.0 		\
+	debhelper 			\
+	libcap2-bin 		\
+	git					\
+	openjdk-8-jdk 		&& \
+    apt-get clean 				 	 && \
+   	rm -rf /var/lib/apt/lists/* 	 && \
+   	wget https://packages.erlang-solutions.com/erlang/esl-erlang/FLAVOUR_1_general/esl-erlang_21.0-1~ubuntu~bionic_amd64.deb && \
+   	dpkg -i esl-erlang_21.0-1~ubuntu~bionic_amd64.deb
+
+ARG beamHash=50f8b287af87129bbaf7f723763ce554ff5c9c1c
+RUN	git clone https://github.com/beamparticle/beamparticle 	&& \
+	cd beamparticle 										&& \
+	git checkout -b localBranch $beamHash 					&& \
+	make deb-package 						
