@@ -1,9 +1,8 @@
 #Python
 USER $USER
 ARG anacondaVer=Anaconda3-5.2.0-Linux-x86_64.sh
-RUN cd $SRC_FOLDER && wget https://repo.continuum.io/archive/$anacondaVer
-
-RUN cd $SRC_FOLDER && bash $anacondaVer -b -p ./anaconda3 	&& 	\
+RUN cd $SRC_FOLDER && wget https://repo.continuum.io/archive/$anacondaVer 		&& \
+    cd $SRC_FOLDER && bash $anacondaVer -b -p ./anaconda3 						&& 	\
 	rm $SRC_FOLDER/anaconda3/lib/libgomp.so* 									&& 	\
 	rm $SRC_FOLDER/anaconda3/lib/libstdc++.so* 									&& 	\
 	rm $SRC_FOLDER/anaconda3/lib/libgfortran.so* 								&& 	\
@@ -12,4 +11,11 @@ RUN cd $SRC_FOLDER && bash $anacondaVer -b -p ./anaconda3 	&& 	\
 	rm $SRC_FOLDER/$anacondaVer				
 
 USER root
+RUN apt-get update && \
+	apt-get install -y python3-pip 	&& \
+	pip3 install --upgrade pip 		&& \
+	apt-get clean 				 	&& \
+   	rm -rf /var/lib/apt/lists/*
+
+
 ENV PYTHONPATH=$SRC_FOLDER/anaconda3/bin PATH=$PYTHONPATH:$PATH

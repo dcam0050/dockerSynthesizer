@@ -1,10 +1,4 @@
 WORKDIR /home/$USER/
-RUN chown -R icub:icub /home/$USER  && \
-	apt-get update 					&& \
-	apt-get install dbus-x11 		&& \
-	apt-get clean 					&& \
-   	rm -rf /var/lib/apt/lists/*
-
 USER $USER
 
 #COPY Xylo.wav  .
@@ -15,7 +9,7 @@ USER $USER
 #COPY myprompt /usr/bin/
 #COPY setpermissions.sh .
 
-RUN mkdir -p .config/terminator && mkdir user_files && echo "" >> .sourceScripts
+RUN mkdir -p .config/terminator && mkdir user_files
 
 COPY config .config/terminator/
 

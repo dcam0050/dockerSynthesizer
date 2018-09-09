@@ -2,6 +2,8 @@ FROM nvidia/cuda:9.2-cudnn7-devel-ubuntu18.04
 
 ARG cores=6
 ENV SRC_FOLDER=/usr/local/src/robot
+ENV TZ=Europe/London
+ENV DEBIAN_FRONTEND=noninteractive
 
 #create icub user
 ARG USER=icub
@@ -12,13 +14,15 @@ RUN apt-get update && \
     useradd -m $USER && echo "$USER:$USER" | chpasswd && adduser $USER sudo && usermod -aG video $USER && usermod -s /bin/bash $USER
 
 COPY keyboard /etc/default/keyboard
-COPY bashrc /home/$USER/.bashrc
+COPY docker-clean /etc/apt/apt.conf.d/docker-clean
+COPY bash.bashrc /etc/bash.bashrc
+COPY bashrc /home/icub/.bashrc
 
 RUN wget https://download.sublimetext.com/sublime-text_build-3126_amd64.deb && \
 	dpkg -i sublime-text_build-3126_amd64.deb && rm sublime-text_build-3126_amd64.deb && \
 	sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 57A5ACB6110576A6 && \
 	sh -c 'echo "deb http://www.icub.org/ubuntu bionic contrib/science" > /etc/apt/sources.list.d/icub.list' && \
-	mkdir $SRC_FOLDER
+	mkdir $SRC_FOLDER && touch /home/$USER/.sourceScripts
 
 RUN apt-get update && apt-get install -y --allow-unauthenticated	\
 	build-essential 						\
@@ -41,11 +45,19 @@ RUN apt-get update && apt-get install -y --allow-unauthenticated	\
 	libpango1.0-0 							\
 	pulseaudio-utils 						\
 	alsa-base 								\
+	dbus-x11							    \
+	libglvnd0 								\
 	alsa-utils								\
 	tmux                                    \
     terminator             					\
     && apt-get clean 						\
    	&& rm -rf /var/lib/apt/lists/*  
+
+# nvidia-container-runtime
+ENV NVIDIA_VISIBLE_DEVICES \
+    ${NVIDIA_VISIBLE_DEVICES:-all}
+ENV NVIDIA_DRIVER_CAPABILITIES \
+    ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics
    	                 
-RUN chown -R $USER:$USER $SRC_FOLDER
+RUN chown -R $USER:$USER $SRC_FOLDER && chown -R $USER:$USER /home/$USER
 WORKDIR $SRC_FOLDER

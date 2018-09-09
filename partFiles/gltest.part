@@ -1,0 +1,36 @@
+FROM nvidia/cuda:9.2-cudnn7-devel-ubuntu18.04
+
+ENV SRC_FOLDER=/usr/local/src/robot
+
+# If host is running squid-deb-proxy on port 8000, populate /etc/apt/apt.conf.d/30proxy
+# By default, squid-deb-proxy 403s unknown sources, so apt shouldn't proxy ppa.launchpad.net
+RUN route -n | awk '/^0.0.0.0/ {print $2}' > /tmp/host_ip.txt
+RUN echo "HEAD /" | nc `cat /tmp/host_ip.txt` 8000 | grep squid-deb-proxy \
+  && (echo "Acquire::http::Proxy \"http://$(cat /tmp/host_ip.txt):8000\";" > /etc/apt/apt.conf.d/30proxy) \
+  && (echo "Acquire::http::Proxy::ppa.launchpad.net DIRECT;" >> /etc/apt/apt.conf.d/30proxy) \
+  || echo "No squid-deb-proxy detected on docker host"
+
+#create icub user
+ARG USER=icub
+RUN apt-get update && \
+    apt-get -y install sudo git wget && \
+    apt-get clean 				 	 && \
+   	rm -rf /var/lib/apt/lists/* 	 && \
+    useradd -m $USER && echo "$USER:$USER" | chpasswd && adduser $USER sudo && usermod -aG video $USER && usermod -s /bin/bash $USER
+
+COPY keyboard /etc/default/keyboard
+COPY docker-clean /etc/apt/apt.conf.d/docker-clean
+COPY bash.bashrc /etc/bash.bashrc
+COPY bashrc /home/icub/.bashrc
+
+# install GLX-Gears and the GL Vendor-Neutral Dispatch library
+RUN apt-get update && apt-get install -y \
+    libglvnd0 \
+    mesa-utils && \
+    rm -rf /var/lib/apt/lists/*
+
+# nvidia-container-runtime
+ENV NVIDIA_VISIBLE_DEVICES \
+    ${NVIDIA_VISIBLE_DEVICES:-all}
+ENV NVIDIA_DRIVER_CAPABILITIES \
+    ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics

@@ -1,36 +1,8 @@
-RUN pip install --upgrade pip               &&  \
-    apt-get update                          &&  \
-    apt-get install -y portaudio19-dev sox  &&  \
-    apt-get install -y pavucontrol parallel &&  \
-    apt-get install -y ros-kinetic-srdfdom ros-kinetic-urdf && \
-    apt-get clean                           &&  \
-    rm -rf /var/lib/apt/lists/*                       
-
-RUN pip install --upgrade                       \
-      pandas                                    \
-      progressbar2                              \
-      numpy                                     \
-      scipy==0.19.1                             \
-      paramiko>=2.1                             \
-      sox                                       \
-      pysftp                                    \                             
-      python_speech_features                    \
-      pyxdg                                     \
-      bs4                                       \
-      pyaudio                                   \
-      simplejson                                \
-      python-utils                              \
-      && conda install setuptools    
-
-RUN git clone https://github.com/dcam0050/ikpy && cd ikpy && python setup.py develop
-
 RUN apt-get update                          &&  \
-    apt-get install -y libgirepository1.0-dev &&  \
-    conda update pycairo &&  \
-    pip install pygobject && \
-    conda install fontconfig=2.11 && \
-    rm /usr/local/src/robot/anaconda2/bin/gst-* && \
-    apt-get install -y gstreamer1.0         &&  \
-    apt-get remove -y gstreamer1.0-vaapi gstreamer1.0-clutter
+    apt-get install -y                          \
+    gstreamer1.0-plugins-bad                    \
+    gstreamer1.0-plugins-good                   \
+    gstreamer1.0-opencv                         \
+    gstreamer1.0-tools
 
-ENV GST_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/gstreamer-1.0/:/usr/local/lib/gstreamer-1.0
+RUN pip install pyaudio

@@ -1,0 +1,12 @@
+ARG version=2.5.5.5-linux64
+ARG naoqipy=pynaoqi-python2.7-$version
+
+COPY $naoqipy.tar.gz ./$naoqipy.tar.gz
+
+RUN tar xvzf $naoqipy.tar.gz 	&& \
+    rm $naoqipy.tar.gz 			&& \
+    mv $naoqipy pynaoqi 		&& \
+    pip install netifaces
+
+ENV PYTHONPATH $PYTHONPATH:$SRC_FOLDER/pynaoqi/
+

@@ -1,12 +1,22 @@
 #Python
-RUN cd $SRC_FOLDER && wget https://repo.continuum.io/archive/Anaconda2-4.2.0-Linux-x86_64.sh && \
-	cd $SRC_FOLDER && bash Anaconda2-4.2.0-Linux-x86_64.sh -b -p ./anaconda2 	&& 	\
-	rm $SRC_FOLDER/anaconda2/lib/libgomp.so* 									&& 	\
-	rm $SRC_FOLDER/anaconda2/lib/libstdc++.so* 									&& 	\
-	rm $SRC_FOLDER/anaconda2/lib/libgfortran.so* 								&& 	\
-	rm $SRC_FOLDER/anaconda2/lib/libQt5*										&& 	\
-	rm -r $SRC_FOLDER/anaconda2/lib/cmake/Qt5* 									&& 	\
-	rm $SRC_FOLDER/Anaconda2-4.2.0-Linux-x86_64.sh && chown -R icub:icub anaconda2
+USER $USER
+ARG anacondaVer=Anaconda2-4.2.0-Linux-x86_64.sh
+ARG anacondaFolder=anaconda2
+RUN cd $SRC_FOLDER && wget https://repo.continuum.io/archive/$anacondaVer 		&& \
+    cd $SRC_FOLDER && bash $anacondaVer -b -p $anacondaFolder						&& 	\
+	rm $SRC_FOLDER/$anacondaFolder/lib/libgomp.so* 									&& 	\
+	rm $SRC_FOLDER/$anacondaFolder/lib/libstdc++.so* 									&& 	\
+	rm $SRC_FOLDER/$anacondaFolder/lib/libgfortran.so* 								&& 	\
+	rm $SRC_FOLDER/$anacondaFolder/lib/libQt5*										&& 	\
+	rm -r $SRC_FOLDER/$anacondaFolder/lib/cmake/Qt5* 									&& 	\
+	rm $SRC_FOLDER/$anacondaVer				
 
-ENV PYTHONPATH=$SRC_FOLDER/anaconda2/bin 
-ENV PATH=$PYTHONPATH:$PATH
+USER root
+RUN apt-get update && \
+	apt-get install -y python-pip 	&& \
+	pip install --upgrade pip 		&& \
+	apt-get clean 				 	&& \
+   	rm -rf /var/lib/apt/lists/*
+
+
+ENV PYTHONPATH=$SRC_FOLDER/$anacondaFolder/bin PATH=$PYTHONPATH:$PATH

@@ -1,4 +1,4 @@
-FROM nvidia/cuda:8.0-cudnn5-devel-ubuntu16.04
+FROM nvidia/cuda:9.1-cudnn7-devel-ubuntu16.04
 
 ARG cores=6
 # ARG VIDEO_GID
@@ -13,45 +13,50 @@ RUN echo "HEAD /" | nc `cat /tmp/host_ip.txt` 8000 | grep squid-deb-proxy \
   || echo "No squid-deb-proxy detected on docker host"
 
 #create icub user
+ARG USER=icub
 RUN apt-get update && \
     apt-get -y install sudo git wget && \
-    useradd -m icub && echo "icub:icub" | chpasswd && adduser icub sudo && usermod -aG video icub && usermod -s /bin/bash icub
+    apt-get clean 				 	 && \
+   	rm -rf /var/lib/apt/lists/* 	 && \
+    useradd -m $USER && echo "$USER:$USER" | chpasswd && adduser $USER sudo && usermod -aG video $USER && usermod -s /bin/bash $USER
 
 COPY keyboard /etc/default/keyboard
+COPY docker-clean /etc/apt/apt.conf.d/docker-clean
+COPY bash.bashrc /etc/bash.bashrc
 COPY bashrc /home/icub/.bashrc
 
 RUN wget https://download.sublimetext.com/sublime-text_build-3126_amd64.deb && \
 	dpkg -i sublime-text_build-3126_amd64.deb && rm sublime-text_build-3126_amd64.deb && \
-	sh -c 'echo "deb http://www.icub.org/ubuntu xenial contrib/science" > /etc/apt/sources.list.d/icub.list' && \
-	mkdir $SRC_FOLDER
+	mkdir $SRC_FOLDER && touch /home/$USER/.sourceScripts
 
 RUN apt-get update && apt-get install -y --allow-unauthenticated	\
 	build-essential 						\
 	cmake-curses-gui 						\
+	vim										\
+	bash-completion 						\
+	dialog 									\
+	apt-utils  								\
+	software-properties-common 				\
 	mesa-utils 								\
 	pkg-config 								\
 	checkinstall 							\
-	bash-completion 						\
-	apt-utils  								\
-	vim										\
-	software-properties-common 				\
 	xterm 									\
 	gedit									\
 	net-tools								\
 	iputils-ping 							\
 	openssh-server							\
 	expect 									\
-	icub-common								\
 	doxygen									\
 	pciutils								\
 	libasound2 								\
 	libpango1.0-0 							\
 	pulseaudio-utils 						\
-	alsa-base 								\
+	alsa-base 								\ls
 	alsa-utils								\
 	tmux                                    \
-    terminator             					\
-    && apt-get clean 						\
-   	&& rm -rf /var/lib/apt/lists/*                   
+   terminator             					\
+  && apt-get clean 						\
+	&& rm -rf /var/lib/apt/lists/*                   
 
+RUN chown -R $USER:$USER $SRC_FOLDER && chown -R $USER:$USER /home/$USER
 WORKDIR $SRC_FOLDER

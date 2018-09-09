@@ -1,0 +1,5 @@
+ARG pyrlangHash=169fb198e605108bd10ba6282faa58fd5c5d20db
+
+RUN	git clone https://github.com/esl/Pyrlang.git && \
+	cd Pyrlang && git checkout -b localBranch $pyrlangHash && \
+	pip3 install -r requirements.txt

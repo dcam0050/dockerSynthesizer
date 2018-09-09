@@ -1,11 +1,12 @@
 # YARP
+
 RUN apt-get update && apt-get install -y \
 	swig3.0				\
-	liblua5.2-dev		\
+	liblua5.3-dev		\
+	icub-common 		\
 	python-tk 			\
 	portaudio19-dev		\
 	libavdevice-dev 	\
-	icub-common 		\
     && apt-get clean    \
    	&& rm -rf /var/lib/apt/lists/* 
 # Works with icub
@@ -34,10 +35,7 @@ RUN mkdir yarp/build && cd yarp/build 									&& 	\
 				-DENABLE_yarpmod_ffmpeg_grabber=ON 							\
 				-DENABLE_yarpmod_portaudio=ON 								\
 				-DENABLE_yarpmod_opencv_grabber=ON 							\
-				-DENABLE_yarpmod_serial=ON 									\
-				-DENABLE_yarpmod_serialport=ON 								\
-				-DENABLE_yarpmod_SerialServoBoard=ON 						\
-				-DYARP_USE_PYTHON_VERSION=2								 &&	\
+				-DYARP_USE_PYTHON_VERSION=3								 &&	\
 	cmake .. 	-DCMAKE_BUILD_TYPE=Release 									\
 				-DCREATE_DEVICE_LIBRARY_MODULES=ON 							\
 				-DCMAKE_INSTALL_PREFIX=./install 							\
@@ -54,10 +52,7 @@ RUN mkdir yarp/build && cd yarp/build 									&& 	\
 				-DENABLE_yarpcar_bayer=ON 									\
 				-DENABLE_yarpcar_mjpeg=ON 									\
 				-DENABLE_yarpmod_opencv_grabber=ON 							\
-				-DENABLE_yarpmod_serial=ON 									\
-				-DENABLE_yarpmod_serialport=ON 								\
-				-DENABLE_yarpmod_SerialServoBoard=ON 						\
-				-DYARP_USE_PYTHON_VERSION=2								&& 	\
+				-DYARP_USE_PYTHON_VERSION=3								&& 	\
 	make -j$cores && make install 
 
 ENV LUA_CPATH=$SRC_FOLDER/yarp/build/lib/lua/?.so  YARP_ROOT=$SRC_FOLDER/yarp
@@ -67,7 +62,7 @@ ENV YARP_LIB=$YARP_DIR/lib \
 	YARP_ROBOT_NAME=iCubSheffield01
 ENV PATH=$YARP_BIN:$LUA_CPATH:$PATH \
 	LD_LIBRARY_PATH=$YARP_LIB:$LD_LIBRARY_PATH
-ENV YARP_PYTHON=$YARP_DIR/lib/python2.7/site-packages:$YARP_DIR/lib/python2.7/dist-packages
+ENV YARP_PYTHON=$YARP_DIR/lib/python3/site-packages
 ENV PYTHONPATH=$PYTHONPATH:$YARP_PYTHON
 ENV YARP_DATA_DIRS=$YARP_DIR/share/yarp
 
